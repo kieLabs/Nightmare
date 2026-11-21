@@ -1,0 +1,3225 @@
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>NIGHTMARE: THE FORGOTTEN WORLD – GAMERKIE EDITION</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;800&family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-void: #050608;
+      --bg-panel: rgba(12, 15, 20, 0.88);
+      --border-subtle: rgba(180, 195, 215, 0.16);
+      --accent-amber: #e29b38;
+      --accent-amber-glow: rgba(226, 155, 56, 0.35);
+      --accent-blood: #b82929;
+      --text-main: #e6ebf2;
+      --text-muted: #8b96a6;
+    }
+
+    * {
+      box-sizing: border-box;
+      user-select: none;
+      -webkit-user-select: none;
+      -webkit-touch-callout: none;
+      margin: 0;
+      padding: 0;
+    }
+
+    html, body {
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      background-color: var(--bg-void);
+      color: var(--text-main);
+      font-family: 'Inter', sans-serif;
+      touch-action: none;
+    }
+
+    #game-canvas {
+      position: fixed;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      display: block;
+      z-index: 1;
+    }
+
+    /* Cinematic Vignette & Film Grain */
+    #vignette {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: 2;
+      background: radial-gradient(circle at center, transparent 42%, rgba(0, 0, 0, 0.82) 100%);
+      transition: background 0.3s ease;
+    }
+
+    #danger-pulse {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: 3;
+      box-shadow: inset 0 0 90px rgba(184, 41, 41, 0);
+      transition: box-shadow 0.2s ease;
+    }
+
+    /* UI Layers */
+    .ui-screen {
+      position: fixed;
+      inset: 0;
+      z-index: 20;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      background: radial-gradient(circle at 50% 35%, rgba(16, 21, 29, 0.78), rgba(4, 5, 7, 0.96));
+      backdrop-filter: blur(8px);
+      padding: 20px;
+      transition: opacity 0.35s ease;
+    }
+
+    .hidden {
+      display: none !important;
+    }
+
+    /* Typography */
+    .title-cinzel {
+      font-family: 'Cinzel', serif;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+    }
+
+    .game-logo {
+      text-align: center;
+      margin-bottom: 24px;
+      animation: floatTitle 5s ease-in-out infinite;
+    }
+
+    @keyframes floatTitle {
+      0%, 100% { transform: translateY(0px); }
+      50% { transform: translateY(-6px); }
+    }
+
+    .game-logo .edition {
+      font-size: 0.75rem;
+      letter-spacing: 0.35em;
+      color: var(--accent-amber);
+      font-weight: 700;
+      margin-bottom: 6px;
+    }
+
+    .game-logo h1 {
+      font-size: clamp(2rem, 5.5vw, 3.8rem);
+      font-weight: 800;
+      color: #f3f6fa;
+      text-shadow: 0 4px 30px rgba(0, 0, 0, 0.95), 0 0 24px rgba(226, 155, 56, 0.25);
+      line-height: 1.05;
+    }
+
+    .game-logo .subtitle {
+      font-size: clamp(0.95rem, 2.2vw, 1.35rem);
+      color: #aab5c4;
+      letter-spacing: 0.28em;
+      margin-top: 6px;
+    }
+
+    .game-logo .tagline {
+      margin-top: 14px;
+      font-size: 0.85rem;
+      font-style: italic;
+      color: var(--text-muted);
+      letter-spacing: 0.06em;
+    }
+
+    /* Buttons */
+    .menu-stack {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      width: 100%;
+      max-width: 320px;
+    }
+
+    .btn {
+      background: linear-gradient(180deg, rgba(28, 34, 44, 0.9), rgba(15, 19, 26, 0.95));
+      border: 1px solid var(--border-subtle);
+      color: var(--text-main);
+      padding: 13px 20px;
+      border-radius: 10px;
+      font-family: 'Inter', sans-serif;
+      font-size: 0.95rem;
+      font-weight: 600;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.45);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+    }
+
+    .btn:hover:not(:disabled) {
+      border-color: var(--accent-amber);
+      color: #fff;
+      transform: translateY(-2px);
+      box-shadow: 0 6px 22px var(--accent-amber-glow);
+    }
+
+    .btn:active:not(:disabled) {
+      transform: translateY(0px) scale(0.98);
+    }
+
+    .btn:disabled {
+      opacity: 0.4;
+      cursor: not-allowed;
+    }
+
+    .btn-primary {
+      background: linear-gradient(180deg, rgba(226, 155, 56, 0.28), rgba(145, 90, 22, 0.35));
+      border-color: rgba(226, 155, 56, 0.65);
+      color: #ffdfa8;
+    }
+
+    .btn-danger {
+      border-color: rgba(184, 41, 41, 0.65);
+      background: linear-gradient(180deg, rgba(184, 41, 41, 0.25), rgba(90, 18, 18, 0.35));
+    }
+
+    /* Panel Cards */
+    .panel-box {
+      background: var(--bg-panel);
+      border: 1px solid var(--border-subtle);
+      border-radius: 14px;
+      padding: 24px;
+      width: 100%;
+      max-width: 780px;
+      max-height: 85vh;
+      overflow-y: auto;
+      box-shadow: 0 18px 50px rgba(0, 0, 0, 0.8);
+    }
+
+    .panel-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 18px;
+      padding-bottom: 12px;
+      border-bottom: 1px solid var(--border-subtle);
+    }
+
+    /* Chapter Grid */
+    .chapter-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(210px, 1fr));
+      gap: 12px;
+      margin-bottom: 18px;
+    }
+
+    .chapter-card {
+      background: rgba(18, 22, 30, 0.85);
+      border: 1px solid var(--border-subtle);
+      border-radius: 10px;
+      padding: 14px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      min-height: 112px;
+    }
+
+    .chapter-card:hover:not(.locked) {
+      border-color: var(--accent-amber);
+      transform: translateY(-2px);
+    }
+
+    .chapter-card.locked {
+      opacity: 0.45;
+      cursor: not-allowed;
+    }
+
+    .chapter-card .ch-num {
+      font-size: 0.7rem;
+      color: var(--accent-amber);
+      font-weight: 700;
+      letter-spacing: 0.14em;
+    }
+
+    .chapter-card .ch-title {
+      font-size: 0.92rem;
+      font-weight: 700;
+      margin: 4px 0;
+      color: #f0f4fa;
+    }
+
+    .chapter-card .ch-meta {
+      font-size: 0.74rem;
+      color: var(--text-muted);
+      display: flex;
+      justify-content: space-between;
+      margin-top: 8px;
+    }
+
+    /* Settings Controls */
+    .setting-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 10px 0;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    .setting-row label {
+      font-size: 0.88rem;
+      color: var(--text-main);
+    }
+
+    .setting-row select,
+    .setting-row input[type="range"] {
+      background: #11161f;
+      color: #fff;
+      border: 1px solid var(--border-subtle);
+      border-radius: 6px;
+      padding: 6px 10px;
+      accent-color: var(--accent-amber);
+    }
+
+    /* HUD */
+    #hud {
+      position: fixed;
+      inset: 0;
+      z-index: 10;
+      pointer-events: none;
+    }
+
+    .hud-top {
+      position: absolute;
+      top: 14px;
+      left: 16px;
+      right: 16px;
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 12px;
+    }
+
+    .hud-mission-box {
+      background: rgba(10, 13, 18, 0.78);
+      border: 1px solid var(--border-subtle);
+      border-left: 3px solid var(--accent-amber);
+      border-radius: 8px;
+      padding: 10px 14px;
+      max-width: 340px;
+      backdrop-filter: blur(4px);
+    }
+
+    .hud-chapter-label {
+      font-size: 0.68rem;
+      letter-spacing: 0.16em;
+      color: var(--accent-amber);
+      font-weight: 700;
+      text-transform: uppercase;
+    }
+
+    .hud-objective {
+      font-size: 0.84rem;
+      color: #eef2f8;
+      margin-top: 3px;
+      line-height: 1.3;
+    }
+
+    .hud-status-bar {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-top: 8px;
+      font-size: 0.74rem;
+      color: var(--text-muted);
+    }
+
+    .battery-track {
+      width: 72px;
+      height: 6px;
+      background: rgba(255, 255, 255, 0.12);
+      border-radius: 4px;
+      overflow: hidden;
+    }
+
+    .battery-fill {
+      height: 100%;
+      width: 100%;
+      background: var(--accent-amber);
+      transition: width 0.2s linear, background 0.2s;
+    }
+
+    .hud-top-actions {
+      display: flex;
+      gap: 8px;
+      pointer-events: auto;
+    }
+
+    .icon-btn {
+      width: 42px;
+      height: 42px;
+      border-radius: 10px;
+      background: rgba(12, 16, 22, 0.82);
+      border: 1px solid var(--border-subtle);
+      color: var(--text-main);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      font-size: 1rem;
+      backdrop-filter: blur(4px);
+      transition: all 0.15s ease;
+    }
+
+    .icon-btn:hover {
+      border-color: var(--accent-amber);
+      color: var(--accent-amber);
+    }
+
+    /* Inventory Strip */
+    .hud-inventory {
+      position: absolute;
+      top: 14px;
+      left: 50%;
+      transform: translateX(-50%);
+      display: flex;
+      gap: 6px;
+      pointer-events: auto;
+    }
+
+    .inv-slot {
+      background: rgba(12, 16, 22, 0.82);
+      border: 1px solid var(--border-subtle);
+      border-radius: 8px;
+      padding: 6px 10px;
+      font-size: 0.74rem;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      color: #f3e4c8;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+    }
+
+    /* Contextual Prompt */
+    #interaction-prompt {
+      position: absolute;
+      bottom: 135px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: rgba(10, 14, 20, 0.9);
+      border: 1px solid var(--accent-amber);
+      border-radius: 20px;
+      padding: 7px 16px;
+      font-size: 0.8rem;
+      font-weight: 600;
+      letter-spacing: 0.05em;
+      color: #ffe4b5;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.75);
+      pointer-events: none;
+      white-space: nowrap;
+    }
+
+    /* Story Toast / Notification */
+    #story-banner {
+      position: absolute;
+      top: 95px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: rgba(8, 10, 14, 0.88);
+      border: 1px solid rgba(226, 155, 56, 0.4);
+      border-radius: 10px;
+      padding: 10px 20px;
+      font-size: 0.85rem;
+      color: #e6ebf2;
+      text-align: center;
+      max-width: 88vw;
+      pointer-events: none;
+      opacity: 0;
+      transition: opacity 0.4s ease;
+    }
+
+    /* Mobile Touch Controls */
+    #mobile-controls {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: 12;
+    }
+
+    .touch-zone-left {
+      position: absolute;
+      bottom: 22px;
+      left: 20px;
+      display: flex;
+      gap: 14px;
+      pointer-events: auto;
+    }
+
+    .touch-zone-right {
+      position: absolute;
+      bottom: 20px;
+      right: 20px;
+      display: grid;
+      grid-template-columns: repeat(3, 56px);
+      grid-template-rows: repeat(2, 56px);
+      gap: 10px;
+      pointer-events: auto;
+    }
+
+    .ctrl-btn {
+      width: 62px;
+      height: 62px;
+      border-radius: 50%;
+      background: rgba(16, 21, 29, 0.72);
+      border: 1.5px solid rgba(200, 215, 235, 0.25);
+      color: #eef3fa;
+      font-size: 0.72rem;
+      font-weight: 700;
+      letter-spacing: 0.04em;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      backdrop-filter: blur(4px);
+      box-shadow: 0 4px 14px rgba(0, 0, 0, 0.55);
+      touch-action: manipulation;
+    }
+
+    .touch-zone-right .ctrl-btn {
+      width: 56px;
+      height: 56px;
+    }
+
+    .ctrl-btn.active {
+      background: rgba(226, 155, 56, 0.38);
+      border-color: var(--accent-amber);
+      transform: scale(0.93);
+      color: #fff;
+    }
+
+    .ctrl-btn span.key-hint {
+      font-size: 0.58rem;
+      color: var(--text-muted);
+      margin-top: 2px;
+    }
+
+    /* Cinematic Letterbox */
+    .letterbox-bar {
+      position: fixed;
+      left: 0;
+      right: 0;
+      height: 0;
+      background: #000;
+      z-index: 15;
+      transition: height 0.5s ease;
+    }
+    .letterbox-top { top: 0; }
+    .letterbox-bottom { bottom: 0; }
+    body.cinematic-mode .letterbox-bar { height: 11vh; }
+
+    /* Modal Dialog */
+    #confirm-modal {
+      position: fixed;
+      inset: 0;
+      z-index: 50;
+      background: rgba(0, 0, 0, 0.8);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+
+    .modal-card {
+      background: #10141c;
+      border: 1px solid var(--border-subtle);
+      border-radius: 12px;
+      padding: 22px;
+      max-width: 380px;
+      width: 100%;
+      text-align: center;
+    }
+
+    @media (max-width: 720px) {
+      .hud-inventory {
+        top: 86px;
+        left: 16px;
+        transform: none;
+      }
+      .hud-mission-box {
+        max-width: 240px;
+        padding: 8px 10px;
+      }
+      .touch-zone-left { bottom: 16px; left: 14px; gap: 10px; }
+      .touch-zone-right { bottom: 16px; right: 14px; gap: 8px; grid-template-columns: repeat(3, 52px); grid-template-rows: repeat(2, 52px); }
+      .touch-zone-right .ctrl-btn { width: 52px; height: 52px; }
+      .ctrl-btn { width: 58px; height: 58px; }
+    }
+  </style>
+</head>
+<body>
+  <!-- 3D Viewport -->
+  <canvas id="game-canvas"></canvas>
+  <div id="vignette"></div>
+  <div id="danger-pulse"></div>
+  <div class="letterbox-bar letterbox-top"></div>
+  <div class="letterbox-bar letterbox-bottom"></div>
+
+  <!-- In-Game HUD -->
+  <div id="hud" class="hidden">
+    <div class="hud-top">
+      <div class="hud-mission-box">
+        <div class="hud-chapter-label" id="hud-ch-name">CHAPTER 1</div>
+        <div class="hud-objective" id="hud-obj-text">Find the lantern and escape the dormitory.</div>
+        <div class="hud-status-bar">
+          <span>LANTERN</span>
+          <div class="battery-track"><div class="battery-fill" id="hud-battery"></div></div>
+          <span id="hud-collectibles">0/24</span>
+          <span id="hud-stealth-tag" style="color:#6ee7b7;font-weight:600;"></span>
+        </div>
+      </div>
+
+      <div class="hud-inventory" id="hud-inv-list"></div>
+
+      <div class="hud-top-actions">
+        <button class="icon-btn" id="btn-hint" title="Hint">?</button>
+        <button class="icon-btn" id="btn-pause" title="Pause">II</button>
+      </div>
+    </div>
+
+    <div id="story-banner"></div>
+    <div id="interaction-prompt" class="hidden"></div>
+
+    <!-- Mobile & Touch Controls -->
+    <div id="mobile-controls">
+      <div class="touch-zone-left">
+        <button class="ctrl-btn" id="ctrl-left">LEFT<span class="key-hint">A / &larr;</span></button>
+        <button class="ctrl-btn" id="ctrl-right">RIGHT<span class="key-hint">D / &rarr;</span></button>
+      </div>
+      <div class="touch-zone-right">
+        <button class="ctrl-btn" id="ctrl-lantern">LIGHT<span class="key-hint">F</span></button>
+        <button class="ctrl-btn" id="ctrl-crouch">CROUCH<span class="key-hint">C / S</span></button>
+        <button class="ctrl-btn" id="ctrl-jump">JUMP<span class="key-hint">SPACE</span></button>
+        <button class="ctrl-btn" id="ctrl-run">RUN<span class="key-hint">SHIFT</span></button>
+        <button class="ctrl-btn" id="ctrl-interact" style="grid-column: span 2; width: 100%; border-radius: 28px;">INTERACT<span class="key-hint">E</span></button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MAIN MENU -->
+  <div id="screen-main" class="ui-screen">
+    <div class="game-logo">
+      <div class="edition">GAMERKIE EDITION</div>
+      <h1 class="title-cinzel">NIGHTMARE</h1>
+      <div class="subtitle title-cinzel">THE FORGOTTEN WORLD</div>
+      <p class="tagline">"Every Shadow Hides a Secret. Every Step Could Be Your Last."</p>
+    </div>
+    <div class="menu-stack">
+      <button class="btn btn-primary" id="btn-continue" disabled>Continue Journey</button>
+      <button class="btn" id="btn-new-game">New Game</button>
+      <button class="btn" id="btn-chapters">Chapter Select</button>
+      <button class="btn" id="btn-collectibles">Secrets &amp; Relics (<span id="menu-relic-count">0/24</span>)</button>
+      <button class="btn" id="btn-settings">Settings</button>
+      <button class="btn" id="btn-credits">Credits &amp; Guide</button>
+    </div>
+  </div>
+
+  <!-- CHAPTER SELECT -->
+  <div id="screen-chapters" class="ui-screen hidden">
+    <div class="panel-box">
+      <div class="panel-header">
+        <h2 class="title-cinzel" style="font-size:1.25rem;">Select Chapter</h2>
+        <button class="btn" style="padding:8px 14px;font-size:0.78rem;" id="btn-chapters-back">Back</button>
+      </div>
+      <div class="chapter-grid" id="chapter-grid"></div>
+    </div>
+  </div>
+
+  <!-- COLLECTIBLES & ACHIEVEMENTS -->
+  <div id="screen-collectibles" class="ui-screen hidden">
+    <div class="panel-box">
+      <div class="panel-header">
+        <h2 class="title-cinzel" style="font-size:1.25rem;">Forgotten Relics &amp; Secrets</h2>
+        <button class="btn" style="padding:8px 14px;font-size:0.78rem;" id="btn-collectibles-back">Back</button>
+      </div>
+      <p style="font-size:0.84rem;color:var(--text-muted);margin-bottom:14px;">
+        Discover all 24 hidden relics across the 8 chapters to unlock the True Secret Ending in Chapter 8.
+      </p>
+      <div id="collectibles-list" class="chapter-grid"></div>
+    </div>
+  </div>
+
+  <!-- SETTINGS -->
+  <div id="screen-settings" class="ui-screen hidden">
+    <div class="panel-box" style="max-width:540px;">
+      <div class="panel-header">
+        <h2 class="title-cinzel" style="font-size:1.25rem;">Settings</h2>
+        <button class="btn" style="padding:8px 14px;font-size:0.78rem;" id="btn-settings-back">Done</button>
+      </div>
+      <div class="setting-row">
+        <label>Graphics Quality</label>
+        <select id="set-graphics">
+          <option value="low">Low (Mobile Battery Saver)</option>
+          <option value="medium" selected>Medium (Balanced)</option>
+          <option value="high">High (Cinematic Shadows)</option>
+        </select>
+      </div>
+      <div class="setting-row">
+        <label>Resolution Scaling</label>
+        <select id="set-resolution">
+          <option value="0.75">75%</option>
+          <option value="1" selected>100% Native</option>
+          <option value="1.25">125% Crisp</option>
+        </select>
+      </div>
+      <div class="setting-row">
+        <label>Master Volume</label>
+        <input type="range" id="set-vol-master" min="0" max="1" step="0.05" value="0.8" />
+      </div>
+      <div class="setting-row">
+        <label>Music &amp; Ambience Volume</label>
+        <input type="range" id="set-vol-music" min="0" max="1" step="0.05" value="0.65" />
+      </div>
+      <div class="setting-row">
+        <label>Sound Effects Volume</label>
+        <input type="range" id="set-vol-sfx" min="0" max="1" step="0.05" value="0.85" />
+      </div>
+      <div class="setting-row">
+        <label>Mobile Touch Controls</label>
+        <select id="set-touch">
+          <option value="auto" selected>Auto / Always Visible</option>
+          <option value="hide">Hidden (Keyboard Only)</option>
+        </select>
+      </div>
+      <div class="setting-row">
+        <label>Display Mode</label>
+        <button class="btn" style="padding:7px 14px;font-size:0.76rem;" id="btn-fullscreen">Toggle Fullscreen</button>
+      </div>
+      <div class="setting-row" style="border:none;padding-top:16px;">
+        <label style="color:#f87171;">Save Data Management</label>
+        <button class="btn btn-danger" style="padding:7px 14px;font-size:0.76rem;" id="btn-reset-save">Reset All Progress</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- CREDITS & CONTROLS -->
+  <div id="screen-credits" class="ui-screen hidden">
+    <div class="panel-box" style="max-width:600px;">
+      <div class="panel-header">
+        <h2 class="title-cinzel" style="font-size:1.25rem;">GamerKie Studio &amp; Controls</h2>
+        <button class="btn" style="padding:8px 14px;font-size:0.78rem;" id="btn-credits-back">Back</button>
+      </div>
+      <div style="font-size:0.86rem;line-height:1.6;color:#cbd5e1;">
+        <p style="margin-bottom:10px;"><strong style="color:var(--accent-amber);">NIGHTMARE: THE FORGOTTEN WORLD – GAMERKIE EDITION</strong></p>
+        <p style="margin-bottom:12px;">Guide young Eli through eight interconnected subterranean chapters. Use shadows, hiding spots, and silence to outsmart five distinct monsters.</p>
+        <p style="margin-bottom:6px;color:#fff;font-weight:600;">Desktop Keyboard Controls:</p>
+        <ul style="margin-left:18px;margin-bottom:12px;">
+          <li><strong>A / D or Left / Right Arrows:</strong> Move Eli</li>
+          <li><strong>Space or W / Up Arrow:</strong> Jump / Grab Ledge / Swim Up</li>
+          <li><strong>Shift:</strong> Sprint (Generates louder footsteps)</li>
+          <li><strong>C or S / Down Arrow:</strong> Crouch / Crawl / Hide</li>
+          <li><strong>E:</strong> Interact / Push Box / Pull Lever / Open Door</li>
+          <li><strong>F:</strong> Toggle Oil Lantern</li>
+          <li><strong>Esc or P:</strong> Pause Game</li>
+        </ul>
+        <p style="font-size:0.78rem;color:var(--text-muted);">Built with Three.js WebGL PBR Engine, Procedural Spatial Web Audio, and IndexedDB Save Persistence.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- PAUSE MENU -->
+  <div id="screen-pause" class="ui-screen hidden">
+    <div class="game-logo" style="margin-bottom:18px;">
+      <h2 class="title-cinzel" style="font-size:2rem;">PAUSED</h2>
+    </div>
+    <div class="menu-stack">
+      <button class="btn btn-primary" id="btn-resume">Resume</button>
+      <button class="btn" id="btn-restart-cp">Restart Checkpoint</button>
+      <button class="btn" id="btn-pause-settings">Settings</button>
+      <button class="btn" id="btn-pause-menu">Main Menu</button>
+    </div>
+  </div>
+
+  <!-- GAME OVER -->
+  <div id="screen-gameover" class="ui-screen hidden">
+    <div class="game-logo">
+      <div class="edition" style="color:#ef4444;">CAUGHT IN THE DARK</div>
+      <h2 class="title-cinzel" style="font-size:2.4rem;color:#fca5a5;">NIGHTMARE CONSUMES YOU</h2>
+      <p class="tagline" id="gameover-reason">The Caretaker found your hiding place.</p>
+    </div>
+    <div class="menu-stack">
+      <button class="btn btn-primary" id="btn-retry">Retry from Checkpoint</button>
+      <button class="btn" id="btn-gameover-menu">Main Menu</button>
+    </div>
+  </div>
+
+  <!-- CHAPTER COMPLETE -->
+  <div id="screen-complete" class="ui-screen hidden">
+    <div class="game-logo">
+      <div class="edition" id="complete-sub">CHAPTER CLEARED</div>
+      <h2 class="title-cinzel" style="font-size:2.1rem;" id="complete-title">THE ABANDONED DORMITORY</h2>
+      <p class="tagline" id="complete-summary">Eli slipped into the ventilation shafts above the sleeping quarters.</p>
+      <p style="margin-top:10px;font-size:0.85rem;color:var(--accent-amber);" id="complete-relics">Relics Found: 1 / 3</p>
+    </div>
+    <div class="menu-stack">
+      <button class="btn btn-primary" id="btn-next-chapter">Next Chapter</button>
+      <button class="btn" id="btn-complete-menu">Main Menu</button>
+    </div>
+  </div>
+
+  <!-- CONFIRMATION MODAL -->
+  <div id="confirm-modal" class="hidden">
+    <div class="modal-card">
+      <h3 class="title-cinzel" style="font-size:1.1rem;margin-bottom:10px;" id="confirm-title">Confirm Action</h3>
+      <p style="font-size:0.85rem;color:var(--text-muted);margin-bottom:18px;" id="confirm-msg">Are you sure?</p>
+      <div style="display:flex;gap:10px;justify-content:center;">
+        <button class="btn btn-danger" id="confirm-yes" style="padding:9px 18px;font-size:0.8rem;">Confirm</button>
+        <button class="btn" id="confirm-no" style="padding:9px 18px;font-size:0.8rem;">Cancel</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Three.js Module Import -->
+  <script type="importmap">
+    {
+      "imports": {
+        "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js"
+      }
+    }
+  </script>
+
+  <script type="module">
+    import * as THREE from 'three';
+
+    /* ==========================================================================
+       1. SAVE SYSTEM (IndexedDB + LocalStorage Fallback)
+       ========================================================================== */
+    class SaveSystem {
+      constructor() {
+        this.dbName = 'NightmareGamerKieDB';
+        this.storeName = 'saves';
+        this.version = 1;
+        this.db = null;
+        this.defaultState = {
+          saveVersion: 1,
+          currentChapter: 0,
+          checkpointIndex: 0,
+          unlockedChapters: [0],
+          completedChapters: [],
+          collectibles: [],
+          settings: {
+            graphics: 'medium',
+            resolution: 1,
+            volMaster: 0.8,
+            volMusic: 0.65,
+            volSfx: 0.85,
+            touch: 'auto'
+          }
+        };
+        this.data = JSON.parse(JSON.stringify(this.defaultState));
+      }
+
+      async init() {
+        try {
+          this.db = await new Promise((resolve, reject) => {
+            const req = indexedDB.open(this.dbName, this.version);
+            req.onupgradeneeded = (e) => {
+              const db = e.target.result;
+              if (!db.objectStoreNames.contains(this.storeName)) {
+                db.createObjectStore(this.storeName);
+              }
+            };
+            req.onsuccess = () => resolve(req.result);
+            req.onerror = () => reject(req.error);
+          });
+          const loaded = await this.loadFromDB();
+          if (loaded && loaded.saveVersion === 1) {
+            this.data = { ...this.defaultState, ...loaded, settings: { ...this.defaultState.settings, ...(loaded.settings || {}) } };
+          } else {
+            this.loadFallback();
+          }
+        } catch (err) {
+          this.loadFallback();
+        }
+      }
+
+      loadFallback() {
+        try {
+          const raw = localStorage.getItem('nightmare_gk_save');
+          if (raw) {
+            const parsed = JSON.parse(raw);
+            if (parsed && parsed.saveVersion === 1) {
+              this.data = { ...this.defaultState, ...parsed };
+            }
+          }
+        } catch (e) {}
+      }
+
+      async loadFromDB() {
+        if (!this.db) return null;
+        return new Promise((resolve) => {
+          const tx = this.db.transaction(this.storeName, 'readonly');
+          const store = tx.objectStore(this.storeName);
+          const req = store.get('mainSave');
+          req.onsuccess = () => resolve(req.result || null);
+          req.onerror = () => resolve(null);
+        });
+      }
+
+      async save() {
+        try {
+          localStorage.setItem('nightmare_gk_save', JSON.stringify(this.data));
+        } catch (e) {}
+        if (!this.db) return;
+        return new Promise((resolve) => {
+          try {
+            const tx = this.db.transaction(this.storeName, 'readwrite');
+            const store = tx.objectStore(this.storeName);
+            store.put(this.data, 'mainSave');
+            tx.oncomplete = () => resolve();
+            tx.onerror = () => resolve();
+          } catch (e) {
+            resolve();
+          }
+        });
+      }
+
+      hasProgress() {
+        return this.data.completedChapters.length > 0 || this.data.checkpointIndex > 0 || this.data.currentChapter > 0;
+      }
+
+      unlockChapter(idx) {
+        if (!this.data.unlockedChapters.includes(idx) && idx < 8) {
+          this.data.unlockedChapters.push(idx);
+        }
+      }
+
+      completeChapter(idx) {
+        if (!this.data.completedChapters.includes(idx)) {
+          this.data.completedChapters.push(idx);
+        }
+        if (idx + 1 < 8) {
+          this.unlockChapter(idx + 1);
+          this.data.currentChapter = idx + 1;
+          this.data.checkpointIndex = 0;
+        }
+        this.save();
+      }
+
+      addCollectible(id) {
+        if (!this.data.collectibles.includes(id)) {
+          this.data.collectibles.push(id);
+          this.save();
+          return true;
+        }
+        return false;
+      }
+
+      async resetAll() {
+        const keepSettings = { ...this.data.settings };
+        this.data = JSON.parse(JSON.stringify(this.defaultState));
+        this.data.settings = keepSettings;
+        await this.save();
+      }
+    }
+
+    /* ==========================================================================
+       2. PROCEDURAL WEB AUDIO ENGINE (Spatial SFX + Horror Drone)
+       ========================================================================== */
+    class AudioManager {
+      constructor(saveSystem) {
+        this.save = saveSystem;
+        this.ctx = null;
+        this.masterGain = null;
+        this.musicGain = null;
+        this.sfxGain = null;
+        this.droneOsc1 = null;
+        this.droneOsc2 = null;
+        this.chaseActive = false;
+        this.initialized = false;
+      }
+
+      init() {
+        if (this.initialized) {
+          if (this.ctx && this.ctx.state === 'suspended') this.ctx.resume();
+          return;
+        }
+        try {
+          const AudioCtx = window.AudioContext || window.webkitAudioContext;
+          this.ctx = new AudioCtx();
+          this.masterGain = this.ctx.createGain();
+          this.musicGain = this.ctx.createGain();
+          this.sfxGain = this.ctx.createGain();
+
+          this.musicGain.connect(this.masterGain);
+          this.sfxGain.connect(this.masterGain);
+          this.masterGain.connect(this.ctx.destination);
+
+          this.applyVolumes();
+          this.startAmbientDrone();
+          this.initialized = true;
+        } catch (e) {}
+      }
+
+      applyVolumes() {
+        if (!this.ctx) return;
+        const s = this.save.data.settings;
+        this.masterGain.gain.setTargetAtTime(s.volMaster, this.ctx.currentTime, 0.05);
+        this.musicGain.gain.setTargetAtTime(s.volMusic * 0.35, this.ctx.currentTime, 0.05);
+        this.sfxGain.gain.setTargetAtTime(s.volSfx, this.ctx.currentTime, 0.05);
+      }
+
+      startAmbientDrone() {
+        if (!this.ctx) return;
+        const now = this.ctx.currentTime;
+        const filter = this.ctx.createBiquadFilter();
+        filter.type = 'lowpass';
+        filter.frequency.setValueAtTime(140, now);
+
+        this.droneOsc1 = this.ctx.createOscillator();
+        this.droneOsc1.type = 'sawtooth';
+        this.droneOsc1.frequency.setValueAtTime(41.2, now); // E1 dark drone
+
+        this.droneOsc2 = this.ctx.createOscillator();
+        this.droneOsc2.type = 'triangle';
+        this.droneOsc2.frequency.setValueAtTime(61.74, now); // B1 fifth
+
+        const droneGain = this.ctx.createGain();
+        droneGain.gain.setValueAtTime(0.28, now);
+
+        this.droneOsc1.connect(filter);
+        this.droneOsc2.connect(filter);
+        filter.connect(droneGain);
+        droneGain.connect(this.musicGain);
+
+        this.droneOsc1.start();
+        this.droneOsc2.start();
+      }
+
+      setChaseTension(isChasing) {
+        if (!this.initialized || this.chaseActive === isChasing) return;
+        this.chaseActive = isChasing;
+        const now = this.ctx.currentTime;
+        if (isChasing) {
+          this.droneOsc1.frequency.setTargetAtTime(55, now, 0.3);
+          this.droneOsc2.frequency.setTargetAtTime(77.78, now, 0.3); // Dissonant tritone
+        } else {
+          this.droneOsc1.frequency.setTargetAtTime(41.2, now, 0.6);
+          this.droneOsc2.frequency.setTargetAtTime(61.74, now, 0.6);
+        }
+      }
+
+      playTone(freq, duration, type = 'sine', vol = 0.25, slideTo = null) {
+        if (!this.initialized) return;
+        const now = this.ctx.currentTime;
+        const osc = this.ctx.createOscillator();
+        const gain = this.ctx.createGain();
+        osc.type = type;
+        osc.frequency.setValueAtTime(freq, now);
+        if (slideTo) osc.frequency.exponentialRampToValueAtTime(slideTo, now + duration);
+
+        gain.gain.setValueAtTime(vol, now);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + duration);
+
+        osc.connect(gain);
+        gain.connect(this.sfxGain);
+        osc.start(now);
+        osc.stop(now + duration);
+      }
+
+      playNoise(duration, filterFreq = 800, vol = 0.2) {
+        if (!this.initialized) return;
+        const bufferSize = this.ctx.sampleRate * duration;
+        const buffer = this.ctx.createBuffer(1, bufferSize, this.ctx.sampleRate);
+        const data = buffer.getChannelData(0);
+        for (let i = 0; i < bufferSize; i++) data[i] = Math.random() * 2 - 1;
+
+        const noise = this.ctx.createBufferSource();
+        noise.buffer = buffer;
+
+        const filter = this.ctx.createBiquadFilter();
+        filter.type = 'bandpass';
+        filter.frequency.value = filterFreq;
+
+        const gain = this.ctx.createGain();
+        const now = this.ctx.currentTime;
+        gain.gain.setValueAtTime(vol, now);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + duration);
+
+        noise.connect(filter);
+        filter.connect(gain);
+        gain.connect(this.sfxGain);
+        noise.start(now);
+      }
+
+      playFootstep(running = false, inWater = false) {
+        if (inWater) {
+          this.playNoise(0.16, 450, running ? 0.24 : 0.14);
+        } else {
+          this.playTone(running ? 115 : 85, 0.08, 'triangle', running ? 0.18 : 0.09, 38);
+        }
+      }
+
+      playJump() {
+        this.playTone(150, 0.18, 'sine', 0.16, 310);
+      }
+
+      playLand() {
+        this.playTone(95, 0.14, 'triangle', 0.22, 35);
+      }
+
+      playInteract() {
+        this.playTone(440, 0.12, 'sine', 0.18, 660);
+      }
+
+      playSwitch() {
+        this.playTone(220, 0.15, 'square', 0.18, 140);
+      }
+
+      playPuzzleSuccess() {
+        this.playTone(330, 0.25, 'triangle', 0.22);
+        setTimeout(() => this.playTone(440, 0.25, 'triangle', 0.22), 110);
+        setTimeout(() => this.playTone(660, 0.45, 'triangle', 0.25), 220);
+      }
+
+      playCollectible() {
+        this.playTone(587.33, 0.2, 'sine', 0.24);
+        setTimeout(() => this.playTone(880, 0.45, 'sine', 0.24), 120);
+      }
+
+      playMonsterAlert() {
+        this.playTone(130, 0.55, 'sawtooth', 0.32, 65);
+      }
+
+      playMonsterStep(distance) {
+        const atten = Math.max(0, 1 - distance / 24);
+        if (atten > 0.05) {
+          this.playTone(62, 0.18, 'sawtooth', 0.25 * atten, 28);
+        }
+      }
+
+      playDeath() {
+        this.playTone(190, 0.9, 'sawtooth', 0.35, 32);
+        this.playNoise(0.7, 300, 0.3);
+      }
+    }
+
+    /* ==========================================================================
+       3. PROCEDURAL PBR TEXTURES & MATERIALS FACTORY
+       ========================================================================== */
+    class MaterialFactory {
+      constructor() {
+        this.cache = new Map();
+      }
+
+      createNoiseTexture(baseHex, grainAmount = 22, lines = false) {
+        const key = `${baseHex}_${grainAmount}_${lines}`;
+        if (this.cache.has(key)) return this.cache.get(key);
+
+        const canvas = document.createElement('canvas');
+        canvas.width = 256;
+        canvas.height = 256;
+        const ctx = canvas.getContext('2d');
+        ctx.fillStyle = baseHex;
+        ctx.fillRect(0, 0, 256, 256);
+
+        const imgData = ctx.getImageData(0, 0, 256, 256);
+        const d = imgData.data;
+        for (let i = 0; i < d.length; i += 4) {
+          const n = (Math.random() - 0.5) * grainAmount;
+          d[i] = Math.min(255, Math.max(0, d[i] + n));
+          d[i + 1] = Math.min(255, Math.max(0, d[i + 1] + n));
+          d[i + 2] = Math.min(255, Math.max(0, d[i + 2] + n));
+        }
+        ctx.putImageData(imgData, 0, 0);
+
+        if (lines) {
+          ctx.strokeStyle = 'rgba(0,0,0,0.28)';
+          ctx.lineWidth = 2;
+          for (let y = 0; y < 256; y += 32) {
+            ctx.beginPath();
+            ctx.moveTo(0, y);
+            ctx.lineTo(256, y);
+            ctx.stroke();
+          }
+        }
+
+        const tex = new THREE.CanvasTexture(canvas);
+        tex.wrapS = THREE.RepeatWrapping;
+        tex.wrapT = THREE.RepeatWrapping;
+        this.cache.set(key, tex);
+        return tex;
+      }
+
+      getPBR(colorHex, roughness = 0.82, metalness = 0.12, lines = false) {
+        const map = this.createNoiseTexture(colorHex, 26, lines);
+        return new THREE.MeshStandardMaterial({
+          map,
+          roughness,
+          metalness,
+          bumpMap: map,
+          bumpScale: 0.03
+        });
+      }
+    }
+
+    /* ==========================================================================
+       4. CHAPTER DEFINITIONS (All 8 Full Chapters with Puzzles, Monsters, Relics)
+       ========================================================================== */
+    const CHAPTER_DATA = [
+      {
+        id: 0,
+        num: 'CHAPTER I',
+        title: 'THE ABANDONED DORMITORY',
+        monsterType: 'caretaker',
+        monsterName: 'The Caretaker',
+        ambientColor: 0x151c28,
+        fogColor: 0x070a0f,
+        fogDensity: 0.036,
+        accentLight: 0xd99b43,
+        objective: 'Find the oil lantern, push the crate to reach the shelf key, and evade The Caretaker.',
+        endingText: 'Eli climbed through the rusted ventilation duct above the dormitory, leaving The Caretaker grasping at shadows.',
+        relics: [
+          { id: 'c1_r1', name: 'Torn Child Drawing', x: 7.5, y: 3.4 },
+          { id: 'c1_r2', name: 'Bent Brass Locket', x: 25.0, y: 1.0 },
+          { id: 'c1_r3', name: 'Dormitory Ledger', x: 41.5, y: 3.6 }
+        ],
+        build(builder) {
+          // Ground & elevated ledges
+          builder.addFloor(-4, 52, 0, '#1e242e');
+          builder.addPlatform(12, 2.2, 4.5, 0.35, '#2b241d'); // Wooden shelf
+          builder.addPlatform(34, 2.4, 5.0, 0.35, '#2b241d'); // Upper vent ledge
+          builder.addWall(-4.5, 0, 8, '#141820');
+          builder.addWall(52.5, 0, 8, '#141820');
+
+          // Decorative background beds & windows
+          builder.addDormitoryProps();
+
+          // Checkpoints
+          builder.addCheckpoint(16, 0);
+          builder.addCheckpoint(33, 0);
+
+          // Lantern pickup at start
+          builder.addPickup('lantern', 'Oil Lantern', 3.2, 0.6);
+
+          // Pushable crate to climb shelf
+          builder.addPushBox('crate_1', 9.0, 0.55, 1.1);
+
+          // Key on top of shelf
+          builder.addPickup('dorm_key', 'Dormitory Iron Key', 12.2, 2.75);
+
+          // Locked Door blocking corridor
+          builder.addLockedDoor('door_1', 19.5, 0, 3.4, 'dorm_key', 'Dormitory Exit Door');
+
+          // Hiding spots (under beds / wardrobes)
+          builder.addHidingSpot(23.5, 0, 2.2, 'Wooden Bed');
+          builder.addHidingSpot(30.5, 0, 2.2, 'Old Wardrobe');
+
+          // Monster: The Caretaker
+          builder.addMonster('caretaker', 27.5, 0, 21.0, 36.0);
+
+          // Crate to reach upper vent exit
+          builder.addPushBox('crate_2', 31.5, 0.55, 1.1);
+
+          // Chapter Exit Vent
+          builder.addExitGate(35.2, 2.6, null, 'Ventilation Shaft');
+        }
+      },
+      {
+        id: 1,
+        num: 'CHAPTER II',
+        title: 'THE FORGOTTEN KITCHEN',
+        monsterType: 'butcher',
+        monsterName: 'The Butcher',
+        ambientColor: 0x221a16,
+        fogColor: 0x0b0807,
+        fogDensity: 0.038,
+        accentLight: 0xe07a3c,
+        objective: 'Activate the three kitchen power valves and evade The Butcher to ride the conveyor chute.',
+        endingText: 'Clinging to the cold steel conveyor tray, Eli plunged down the refuse chute into the flooded depths below.',
+        relics: [
+          { id: 'c2_r1', name: 'Rusted Cleaver Tag', x: 5.0, y: 2.9 },
+          { id: 'c2_r2', name: 'Ration Manifest', x: 24.5, y: 0.8 },
+          { id: 'c2_r3', name: 'Porcelain Mask Shard', x: 44.0, y: 2.8 }
+        ],
+        build(builder) {
+          builder.addFloor(-4, 54, 0, '#25211e');
+          builder.addPlatform(6.0, 2.1, 4.0, 0.35, '#36322f');
+          builder.addPlatform(21.0, 2.3, 4.5, 0.35, '#36322f');
+          builder.addPlatform(42.0, 2.2, 5.0, 0.35, '#36322f');
+          builder.addWall(-4.5, 0, 8, '#161311');
+          builder.addWall(54.5, 0, 8, '#161311');
+          builder.addKitchenProps();
+
+          builder.addCheckpoint(17, 0);
+          builder.addCheckpoint(35, 0);
+
+          // 3 Mechanical Switches for the Conveyor Gate
+          builder.addSwitch('sw_k1', 6.2, 2.4, 'Boiler Valve I');
+          builder.addPushBox('trolley_1', 18.0, 0.55, 1.1);
+          builder.addSwitch('sw_k2', 21.2, 2.6, 'Boiler Valve II');
+          builder.addSwitch('sw_k3', 36.5, 0.8, 'Conveyor Breaker');
+
+          builder.addHidingSpot(13.5, 0, 2.2, 'Prep Table');
+          builder.addHidingSpot(28.5, 0, 2.2, 'Cold Storage Locker');
+
+          builder.addMonster('butcher', 25.0, 0, 12.0, 34.0);
+
+          builder.addMultiSwitchDoor('conveyor_gate', 40.0, 0, 3.6, ['sw_k1', 'sw_k2', 'sw_k3'], 'Conveyor Bulkhead');
+          builder.addExitGate(43.5, 2.4, null, 'Refuse Conveyor');
+        }
+      },
+      {
+        id: 2,
+        num: 'CHAPTER III',
+        title: 'THE FLOODED PRISON',
+        monsterType: 'drowned',
+        monsterName: 'The Drowned',
+        ambientColor: 0x102229,
+        fogColor: 0x050d12,
+        fogDensity: 0.04,
+        accentLight: 0x4cc9f0,
+        objective: 'Cross the submerged cellblock, drain the lower basin, retrieve the Warden Key, and outswim The Drowned.',
+        endingText: 'With heavy iron bars clanging shut behind him, Eli gasped for air at the threshold of the Toy Workshop.',
+        relics: [
+          { id: 'c3_r1', name: 'Prisoner Tally Spoon', x: 8.0, y: 2.6 },
+          { id: 'c3_r2', name: 'Waterlogged Letter', x: 26.0, y: 0.6 },
+          { id: 'c3_r3', name: 'Warden Brass Badge', x: 46.0, y: 2.6 }
+        ],
+        build(builder) {
+          // Left dry walkway, central flooded basin, right cellblock
+          builder.addFloor(-4, 14, 0, '#1c262b');
+          builder.addFloor(14, 34, -1.6, '#141d22'); // Deep flooded floor
+          builder.addFloor(34, 54, 0, '#1c262b');
+          builder.addWaterZone(14, 34, -1.6, 0.15);
+
+          builder.addPlatform(8.5, 2.0, 3.5, 0.3, '#28343b');
+          builder.addPlatform(20.0, 0.35, 3.2, 0.3, '#3d2e22'); // Floating wooden raft
+          builder.addPlatform(28.0, 0.35, 3.2, 0.3, '#3d2e22'); // Floating wooden raft
+          builder.addPlatform(44.5, 2.0, 4.0, 0.3, '#28343b');
+
+          builder.addWall(-4.5, 0, 8, '#10161a');
+          builder.addWall(54.5, 0, 8, '#10161a');
+          builder.addPrisonProps();
+
+          builder.addCheckpoint(13, 0);
+          builder.addCheckpoint(35, 0);
+
+          // Underwater / Sunken Key & Pump Lever
+          builder.addSwitch('pump_lever', 24.0, 0.65, 'Drainage Pump');
+          builder.addPickup('prison_key', 'Warden Cell Key', 31.5, -1.0);
+
+          builder.addHidingSpot(38.0, 0, 2.2, 'Rusted Iron Cell');
+          builder.addMonster('drowned', 23.0, -1.1, 15.0, 33.0, true);
+
+          builder.addLockedDoor('prison_door', 41.5, 0, 3.6, 'prison_key', 'Cellblock Floodgate');
+          builder.addExitGate(48.0, 0.2, null, 'Workshop Stairwell');
+        }
+      },
+      {
+        id: 3,
+        num: 'CHAPTER IV',
+        title: 'THE TOY FACTORY',
+        monsterType: 'toymaker',
+        monsterName: 'The Toymaker',
+        ambientColor: 0x241928,
+        fogColor: 0x0a060d,
+        fogDensity: 0.036,
+        accentLight: 0xd97706,
+        objective: 'Recover the Main Drive Gear, restore the assembly line, and evade The Toymaker.',
+        endingText: 'Sparks showered from the overloaded assembly press as Eli slipped beneath the shutter into the Hospital wing.',
+        relics: [
+          { id: 'c4_r1', name: 'Clockwork Wind-Up Key', x: 6.5, y: 2.7 },
+          { id: 'c4_r2', name: 'Porcelain Doll Eye', x: 27.5, y: 2.8 },
+          { id: 'c4_r3', name: 'Blueprint: Project Hollow', x: 47.0, y: 0.8 }
+        ],
+        build(builder) {
+          builder.addFloor(-4, 54, 0, '#221d26');
+          builder.addPlatform(7.0, 2.1, 4.0, 0.35, '#33293a');
+          builder.addMovingPlatform('mp_toy1', 15.5, 1.8, 3.2, 0.3, 15.5, 22.5, 2.2);
+          builder.addPlatform(27.5, 2.2, 4.5, 0.35, '#33293a');
+          builder.addWall(-4.5, 0, 8, '#141017');
+          builder.addWall(54.5, 0, 8, '#141017');
+          builder.addFactoryProps();
+
+          builder.addCheckpoint(13.5, 0);
+          builder.addCheckpoint(32.0, 0);
+
+          builder.addPickup('drive_gear', 'Brass Drive Gear', 28.0, 2.75);
+          builder.addHidingSpot(19.0, 0, 2.2, 'Toy Shipping Crate');
+          builder.addHidingSpot(36.0, 0, 2.2, 'Mannequin Rack');
+
+          builder.addMonster('toymaker', 33.0, 0, 25.0, 44.0);
+
+          builder.addLockedDoor('factory_shutter', 42.0, 0, 3.6, 'drive_gear', 'Gearbox Security Shutter');
+          builder.addExitGate(48.5, 0.2, null, 'Hospital Corridor');
+        }
+      },
+      {
+        id: 4,
+        num: 'CHAPTER V',
+        title: 'THE DARK HOSPITAL',
+        monsterType: 'caretaker',
+        monsterName: 'The Head Orderly',
+        ambientColor: 0x142420,
+        fogColor: 0x050b09,
+        fogDensity: 0.04,
+        accentLight: 0x34d399,
+        objective: 'Find the Surgeon Keycard, restore ward power, and reach the emergency elevator.',
+        endingText: 'The freight elevator groaned downward into total blackness, carrying Eli toward the subterranean railway.',
+        relics: [
+          { id: 'c5_r1', name: 'Cracked Stethoscope', x: 10.0, y: 0.8 },
+          { id: 'c5_r2', name: 'Patient 04 Case File', x: 25.5, y: 2.7 },
+          { id: 'c5_r3', name: 'Glass Vial of Mist', x: 45.0, y: 2.7 }
+        ],
+        build(builder) {
+          builder.addFloor(-4, 54, 0, '#1b2623');
+          builder.addPlatform(25.0, 2.1, 4.5, 0.35, '#293834');
+          builder.addPlatform(44.5, 2.1, 4.5, 0.35, '#293834');
+          builder.addWall(-4.5, 0, 8, '#0f1614');
+          builder.addWall(54.5, 0, 8, '#0f1614');
+          builder.addHospitalProps();
+
+          builder.addCheckpoint(16, 0);
+          builder.addCheckpoint(34, 0);
+
+          builder.addPushBox('med_cart', 21.5, 0.55, 1.1);
+          builder.addPickup('hosp_card', 'Surgeon Access Card', 25.5, 2.65);
+          builder.addSwitch('ward_power', 35.5, 0.8, 'Emergency Generator');
+
+          builder.addHidingSpot(13.0, 0, 2.2, 'Curtained Gurney');
+          builder.addHidingSpot(30.5, 0, 2.2, 'Medicine Cabinet');
+
+          builder.addMonster('caretaker', 28.0, 0, 14.0, 39.0);
+
+          builder.addLockedDoor('ward_door', 40.5, 0, 3.6, 'hosp_card', 'Lift Security Door');
+          builder.addExitGate(48.0, 0.2, null, 'Subway Freight Lift');
+        }
+      },
+      {
+        id: 5,
+        num: 'CHAPTER VI',
+        title: 'THE UNDERGROUND RAILWAY',
+        monsterType: 'butcher',
+        monsterName: 'The Tunnel Stalker',
+        ambientColor: 0x1c1e26,
+        fogColor: 0x07080b,
+        fogDensity: 0.036,
+        accentLight: 0xf59e0b,
+        objective: 'Align the track signals, unlock the locomotive cabin, and ride the train to the Forgotten Tower.',
+        endingText: 'The rusted locomotive shrieked along the abyssal tracks, crashing through the gates of the Forgotten Tower.',
+        relics: [
+          { id: 'c6_r1', name: 'Punched Brass Ticket', x: 7.5, y: 2.7 },
+          { id: 'c6_r2', name: 'Stationmaster Watch', x: 28.0, y: 0.8 },
+          { id: 'c6_r3', name: 'Signal Lantern Lens', x: 46.5, y: 2.7 }
+        ],
+        build(builder) {
+          builder.addFloor(-4, 54, 0, '#1e2026');
+          builder.addPlatform(7.5, 2.1, 4.2, 0.35, '#2d313b');
+          builder.addPlatform(45.5, 2.1, 5.5, 0.35, '#2d313b'); // Train boarding platform
+          builder.addWall(-4.5, 0, 8, '#101216');
+          builder.addWall(54.5, 0, 8, '#101216');
+          builder.addRailwayProps();
+
+          builder.addCheckpoint(18, 0);
+          builder.addCheckpoint(36, 0);
+
+          builder.addSwitch('sig_1', 7.5, 2.4, 'Track Signal Alpha');
+          builder.addSwitch('sig_2', 24.0, 0.8, 'Track Signal Beta');
+          builder.addPickup('train_key', 'Locomotive Ignition Key', 33.5, 0.6);
+
+          builder.addHidingSpot(15.0, 0, 2.2, 'Luggage Pile');
+          builder.addHidingSpot(30.5, 0, 2.2, 'Ticket Booth');
+
+          builder.addMonster('butcher', 27.0, 0, 16.0, 38.0);
+
+          builder.addMultiSwitchDoor('rail_gate', 41.5, 0, 3.6, ['sig_1', 'sig_2'], 'Platform Turnstile');
+          builder.addExitGate(47.5, 2.3, 'train_key', 'Locomotive Cabin');
+        }
+      },
+      {
+        id: 6,
+        num: 'CHAPTER VII',
+        title: 'THE FORGOTTEN TOWER',
+        monsterType: 'watcher',
+        monsterName: 'The Watcher',
+        ambientColor: 0x1a192b,
+        fogColor: 0x06060d,
+        fogDensity: 0.034,
+        accentLight: 0xa78bfa,
+        objective: 'Stay in shadow to avoid The Watcher’s gaze, align the three Astral Clocks, and enter the Core.',
+        endingText: 'The colossal clockwork dial parted, revealing the heart of The Forgotten World.',
+        relics: [
+          { id: 'c7_r1', name: 'Pendulum Feather', x: 9.0, y: 2.7 },
+          { id: 'c7_r2', name: 'Astral Astrolabe', x: 26.5, y: 2.7 },
+          { id: 'c7_r3', name: 'Architect Seal', x: 45.0, y: 2.7 }
+        ],
+        build(builder) {
+          builder.addFloor(-4, 54, 0, '#1d1c2b');
+          builder.addPlatform(9.0, 2.1, 4.2, 0.35, '#2c2a40');
+          builder.addPlatform(26.5, 2.1, 4.6, 0.35, '#2c2a40');
+          builder.addPlatform(44.5, 2.1, 4.6, 0.35, '#2c2a40');
+          builder.addWall(-4.5, 0, 8, '#0f0e17');
+          builder.addWall(54.5, 0, 8, '#0f0e17');
+          builder.addTowerProps();
+
+          builder.addCheckpoint(17, 0);
+          builder.addCheckpoint(35, 0);
+
+          builder.addSwitch('clk_1', 9.0, 2.4, 'Hour Dial');
+          builder.addSwitch('clk_2', 26.5, 2.4, 'Minute Dial');
+          builder.addSwitch('clk_3', 44.5, 2.4, 'Second Dial');
+
+          builder.addHidingSpot(14.5, 0, 2.4, 'Stone Pillar Shadow');
+          builder.addHidingSpot(32.5, 0, 2.4, 'Clockwork Alcove');
+
+          builder.addMonster('watcher', 23.0, 0, 12.0, 41.0);
+
+          builder.addMultiSwitchDoor('sanctum_door', 48.0, 0, 3.8, ['clk_1', 'clk_2', 'clk_3'], 'Sanctum Gate');
+          builder.addExitGate(51.0, 0.2, null, 'Inner Sanctum');
+        }
+      },
+      {
+        id: 7,
+        num: 'CHAPTER VIII',
+        title: 'THE LAST ESCAPE',
+        monsterType: 'caretaker',
+        monsterName: 'The Warden of Shadows',
+        ambientColor: 0x261414,
+        fogColor: 0x0a0404,
+        fogDensity: 0.036,
+        accentLight: 0xf87171,
+        objective: 'Overload the Core Lockdown, outrun the collapsing abyss, and ascend to the surface!',
+        endingText: 'Sunlight pierced the subterranean mist as the elevator breached the surface. Eli was free at last.',
+        relics: [
+          { id: 'c8_r1', name: 'First Light Medallion', x: 8.5, y: 2.7 },
+          { id: 'c8_r2', name: 'Forgotten Child’s Ribbon', x: 28.5, y: 2.7 },
+          { id: 'c8_r3', name: 'Key to the Surface', x: 47.0, y: 0.8 }
+        ],
+        build(builder) {
+          builder.addFloor(-4, 58, 0, '#241818');
+          builder.addPlatform(8.5, 2.1, 4.2, 0.35, '#382424');
+          builder.addMovingPlatform('mp_final', 17.5, 1.9, 3.4, 0.3, 17.5, 24.5, 2.8);
+          builder.addPlatform(29.0, 2.1, 4.5, 0.35, '#382424');
+          builder.addWall(-4.5, 0, 8, '#140c0c');
+          builder.addWall(58.5, 0, 8, '#140c0c');
+          builder.addFinalProps();
+
+          builder.addCheckpoint(15.0, 0);
+          builder.addCheckpoint(36.0, 0);
+
+          builder.addSwitch('core_1', 8.5, 2.4, 'Containment Release I');
+          builder.addSwitch('core_2', 29.0, 2.4, 'Containment Release II');
+          builder.addPickup('surface_key', 'Surface Lift Master Key', 38.5, 0.6);
+
+          builder.addHidingSpot(13.0, 0, 2.2, 'Collapsed Bulkhead');
+          builder.addHidingSpot(34.0, 0, 2.2, 'Steel Conduit');
+
+          builder.addMonster('caretaker', 31.0, 0, 14.0, 48.0);
+
+          builder.addMultiSwitchDoor('final_blast_door', 44.5, 0, 3.8, ['core_1', 'core_2'], 'Surface Blast Door');
+          builder.addExitGate(52.5, 0.2, 'surface_key', 'Surface Ascent Elevator');
+        }
+      }
+    ];
+
+    /* ==========================================================================
+       5. 3D CHARACTER & MONSTER RIG BUILDER (Eli + 5 Distinct Monsters)
+       ========================================================================== */
+    function createEliCharacter(matFactory) {
+      const root = new THREE.Group();
+
+      const coatMat = new THREE.MeshStandardMaterial({ color: 0xd49b27, roughness: 0.78, metalness: 0.05 });
+      const skinMat = new THREE.MeshStandardMaterial({ color: 0xe6c3a5, roughness: 0.65 });
+      const pantMat = new THREE.MeshStandardMaterial({ color: 0x262b34, roughness: 0.9 });
+      const bootMat = new THREE.MeshStandardMaterial({ color: 0x181a1f, roughness: 0.7 });
+
+      // Torso (Oversized Raincoat)
+      const coatGeo = new THREE.CylinderGeometry(0.18, 0.28, 0.62, 12);
+      const coat = new THREE.Mesh(coatGeo, coatMat);
+      coat.position.y = 0.56;
+      coat.castShadow = true;
+      root.add(coat);
+
+      // Head & Hood
+      const headGroup = new THREE.Group();
+      headGroup.position.y = 0.98;
+      const head = new THREE.Mesh(new THREE.SphereGeometry(0.16, 14, 14), skinMat);
+      head.castShadow = true;
+      headGroup.add(head);
+
+      const hood = new THREE.Mesh(new THREE.SphereGeometry(0.185, 14, 14, 0, Math.PI * 2, 0, Math.PI * 0.68), coatMat);
+      hood.rotation.x = -0.25;
+      hood.position.set(0, 0.02, -0.02);
+      hood.castShadow = true;
+      headGroup.add(hood);
+
+      // Expressive Eyes
+      const eyeMat = new THREE.MeshBasicMaterial({ color: 0x111111 });
+      const eyeL = new THREE.Mesh(new THREE.SphereGeometry(0.022, 8, 8), eyeMat);
+      eyeL.position.set(0.06, 0.01, 0.145);
+      const eyeR = eyeL.clone();
+      eyeR.position.set(-0.06, 0.01, 0.145);
+      headGroup.add(eyeL, eyeR);
+      root.add(headGroup);
+
+      // Legs
+      const legL = new THREE.Group();
+      legL.position.set(0.08, 0.32, 0);
+      const legMeshL = new THREE.Mesh(new THREE.CylinderGeometry(0.055, 0.05, 0.28, 8), pantMat);
+      legMeshL.position.y = -0.14;
+      const bootL = new THREE.Mesh(new THREE.BoxGeometry(0.11, 0.08, 0.17), bootMat);
+      bootL.position.set(0, -0.28, 0.03);
+      legL.add(legMeshL, bootL);
+
+      const legR = legL.clone();
+      legR.position.x = -0.08;
+      root.add(legL, legR);
+
+      // Arms & Lantern
+      const armL = new THREE.Group();
+      armL.position.set(0.22, 0.78, 0);
+      const armMeshL = new THREE.Mesh(new THREE.CylinderGeometry(0.05, 0.045, 0.36, 8), coatMat);
+      armMeshL.position.y = -0.16;
+      armL.add(armMeshL);
+
+      const armR = new THREE.Group();
+      armR.position.set(-0.22, 0.78, 0);
+      const armMeshR = armMeshL.clone();
+      armR.add(armMeshR);
+
+      // Small Brass Oil Lantern attached to right hand
+      const lanternGroup = new THREE.Group();
+      lanternGroup.position.set(0, -0.36, 0.12);
+      const lanternBody = new THREE.Mesh(
+        new THREE.CylinderGeometry(0.065, 0.075, 0.16, 8),
+        new THREE.MeshStandardMaterial({ color: 0xffb74d, emissive: 0xff8f00, emissiveIntensity: 1.8 })
+      );
+      const lanternCap = new THREE.Mesh(
+        new THREE.ConeGeometry(0.09, 0.07, 8),
+        new THREE.MeshStandardMaterial({ color: 0x2b2620, metalness: 0.8, roughness: 0.3 })
+      );
+      lanternCap.position.y = 0.11;
+      lanternGroup.add(lanternBody, lanternCap);
+      armR.add(lanternGroup);
+
+      root.add(armL, armR);
+
+      // Dynamic Point Light for Lantern
+      const lanternLight = new THREE.PointLight(0xffaa44, 3.2, 11.5, 1.6);
+      lanternLight.position.set(0, 0.75, 0.45);
+      root.add(lanternLight);
+
+      return {
+        root,
+        coat,
+        headGroup,
+        legL,
+        legR,
+        armL,
+        armR,
+        lanternGroup,
+        lanternBody,
+        lanternLight
+      };
+    }
+
+    function createMonsterRig(type) {
+      const root = new THREE.Group();
+      const palettes = {
+        caretaker: { body: 0x1f2229, accent: 0x9ca3af, height: 2.35, width: 0.32, eye: 0xfef08a },
+        butcher: { body: 0x3b1d1d, accent: 0xd1d5db, height: 2.05, width: 0.56, eye: 0xef4444 },
+        drowned: { body: 0x13333a, accent: 0x5eead4, height: 1.75, width: 0.36, eye: 0x38bdf8 },
+        toymaker: { body: 0x2e1f36, accent: 0xf59e0b, height: 2.15, width: 0.38, eye: 0xfbbf24 },
+        watcher: { body: 0x181526, accent: 0xc4b5fd, height: 2.25, width: 0.30, eye: 0xe879f9 }
+      };
+      const cfg = palettes[type] || palettes.caretaker;
+
+      const bodyMat = new THREE.MeshStandardMaterial({ color: cfg.body, roughness: 0.85, metalness: 0.15 });
+      const accentMat = new THREE.MeshStandardMaterial({ color: cfg.accent, roughness: 0.5, metalness: 0.4 });
+      const eyeMat = new THREE.MeshBasicMaterial({ color: cfg.eye });
+
+      const torso = new THREE.Mesh(new THREE.CylinderGeometry(cfg.width * 0.75, cfg.width, cfg.height * 0.55, 10), bodyMat);
+      torso.position.y = cfg.height * 0.52;
+      torso.castShadow = true;
+      root.add(torso);
+
+      const head = new THREE.Mesh(new THREE.SphereGeometry(cfg.width * 0.65, 12, 12), accentMat);
+      head.position.y = cfg.height * 0.88;
+      head.castShadow = true;
+      root.add(head);
+
+      // Glowing Horror Eyes + Vision Cone Spotlight
+      const eyeL = new THREE.Mesh(new THREE.SphereGeometry(0.045, 8, 8), eyeMat);
+      eyeL.position.set(0.09, cfg.height * 0.88, cfg.width * 0.58);
+      const eyeR = eyeL.clone();
+      eyeR.position.x = -0.09;
+      root.add(eyeL, eyeR);
+
+      const gazeLight = new THREE.SpotLight(cfg.eye, 4.5, 12, Math.PI / 5, 0.5, 1.2);
+      gazeLight.position.set(0, cfg.height * 0.86, 0.2);
+      const gazeTarget = new THREE.Object3D();
+      gazeTarget.position.set(0, 0.6, 6.0);
+      root.add(gazeLight, gazeTarget);
+      gazeLight.target = gazeTarget;
+
+      // Long Arms
+      const armL = new THREE.Group();
+      armL.position.set(cfg.width + 0.08, cfg.height * 0.76, 0);
+      const armMeshL = new THREE.Mesh(new THREE.CylinderGeometry(0.06, 0.04, cfg.height * 0.52, 8), bodyMat);
+      armMeshL.position.y = -cfg.height * 0.25;
+      armL.add(armMeshL);
+
+      const armR = armL.clone();
+      armR.position.x = -(cfg.width + 0.08);
+      root.add(armL, armR);
+
+      // Legs
+      const legL = new THREE.Group();
+      legL.position.set(cfg.width * 0.45, cfg.height * 0.28, 0);
+      const legMeshL = new THREE.Mesh(new THREE.CylinderGeometry(0.08, 0.06, cfg.height * 0.32, 8), bodyMat);
+      legMeshL.position.y = -cfg.height * 0.14;
+      legL.add(legMeshL);
+
+      const legR = legL.clone();
+      legR.position.x = -cfg.width * 0.45;
+      root.add(legL, legR);
+
+      return { root, torso, head, armL, armR, legL, legR, gazeLight, cfg };
+    }
+
+    /* ==========================================================================
+       6. LEVEL BUILDER & ENTITY MANAGER
+       ========================================================================== */
+    class LevelBuilder {
+      constructor(scene, matFactory, saveSystem) {
+        this.scene = scene;
+        this.mats = matFactory;
+        this.save = saveSystem;
+        this.levelGroup = new THREE.Group();
+        this.scene.add(this.levelGroup);
+
+        this.solids = [];         // Static & dynamic AABB platforms/walls
+        this.pushBoxes = [];      // Physics crates/trolleys
+        this.doors = [];          // Locked & multi-switch doors
+        this.switches = [];       // Levers & valves
+        this.pickups = [];        // Keys, lantern, gears
+        this.relics = [];         // Secret collectibles
+        this.hidingSpots = [];    // Beds, lockers, alcoves
+        this.waterZones = [];     // Buoyancy & swimming areas
+        this.movingPlatforms = [];
+        this.checkpoints = [];
+        this.monsters = [];
+        this.exitGate = null;
+        this.animatedProps = [];
+      }
+
+      clear() {
+        while (this.levelGroup.children.length > 0) {
+          const child = this.levelGroup.children[0];
+          this.levelGroup.remove(child);
+        }
+        this.solids = [];
+        this.pushBoxes = [];
+        this.doors = [];
+        this.switches = [];
+        this.pickups = [];
+        this.relics = [];
+        this.hidingSpots = [];
+        this.waterZones = [];
+        this.movingPlatforms = [];
+        this.checkpoints = [];
+        this.monsters = [];
+        this.exitGate = null;
+        this.animatedProps = [];
+      }
+
+      addBoxMesh(x, y, z, w, h, d, colorHex, lines = false) {
+        const geo = new THREE.BoxGeometry(w, h, d);
+        const mat = this.mats.getPBR(colorHex, 0.85, 0.15, lines);
+        const mesh = new THREE.Mesh(geo, mat);
+        mesh.position.set(x, y, z);
+        mesh.receiveShadow = true;
+        mesh.castShadow = true;
+        this.levelGroup.add(mesh);
+        return mesh;
+      }
+
+      addFloor(xStart, xEnd, yTop, colorHex) {
+        const width = xEnd - xStart;
+        const height = 4.0;
+        const cx = xStart + width / 2;
+        const cy = yTop - height / 2;
+        this.addBoxMesh(cx, cy, 0, width, height, 6.5, colorHex, true);
+        this.solids.push({ minX: xStart, maxX: xEnd, minY: yTop - height, maxY: yTop, type: 'floor' });
+
+        // Atmospheric Back Wall
+        const backMat = this.mats.getPBR('#0e1117', 0.92, 0.08, true);
+        const backWall = new THREE.Mesh(new THREE.BoxGeometry(width + 4, 14, 0.5), backMat);
+        backWall.position.set(cx, yTop + 5, -3.2);
+        backWall.receiveShadow = true;
+        this.levelGroup.add(backWall);
+      }
+
+      addPlatform(cx, yTop, width, thickness, colorHex) {
+        this.addBoxMesh(cx, yTop - thickness / 2, 0, width, thickness, 2.4, colorHex, true);
+        this.solids.push({
+          minX: cx - width / 2,
+          maxX: cx + width / 2,
+          minY: yTop - thickness,
+          maxY: yTop,
+          type: 'platform'
+        });
+      }
+
+      addMovingPlatform(id, x1, yTop, width, thickness, xMin, xMax, speed) {
+        const mesh = this.addBoxMesh(x1, yTop - thickness / 2, 0, width, thickness, 2.2, '#4b5563', true);
+        const box = {
+          id,
+          mesh,
+          cx: x1,
+          yTop,
+          width,
+          thickness,
+          xMin,
+          xMax,
+          speed,
+          dir: 1,
+          vx: 0,
+          minX: x1 - width / 2,
+          maxX: x1 + width / 2,
+          minY: yTop - thickness,
+          maxY: yTop,
+          type: 'moving'
+        };
+        this.movingPlatforms.push(box);
+        this.solids.push(box);
+      }
+
+      addWall(cx, yBottom, height, colorHex) {
+        this.addBoxMesh(cx, yBottom + height / 2, 0, 1.0, height, 6.5, colorHex, true);
+        this.solids.push({
+          minX: cx - 0.5,
+          maxX: cx + 0.5,
+          minY: yBottom,
+          maxY: yBottom + height,
+          type: 'wall'
+        });
+      }
+
+      addPushBox(id, x, yCenter, size) {
+        const mesh = this.addBoxMesh(x, yCenter, 0, size, size, size, '#5c4028', true);
+        const obj = {
+          id,
+          mesh,
+          x,
+          y: yCenter - size / 2,
+          w: size,
+          h: size,
+          vy: 0,
+          minX: x - size / 2,
+          maxX: x + size / 2,
+          minY: yCenter - size / 2,
+          maxY: yCenter + size / 2,
+          type: 'pushbox'
+        };
+        this.pushBoxes.push(obj);
+        this.solids.push(obj);
+      }
+
+      addLockedDoor(id, x, yBottom, height, requiredItem, label) {
+        const mesh = this.addBoxMesh(x, yBottom + height / 2, 0, 0.55, height, 2.6, '#3f2e21', true);
+        const solid = {
+          minX: x - 0.28,
+          maxX: x + 0.28,
+          minY: yBottom,
+          maxY: yBottom + height,
+          type: 'door'
+        };
+        this.solids.push(solid);
+        this.doors.push({ id, x, yBottom, height, mesh, solid, requiredItem, label, open: false });
+      }
+
+      addMultiSwitchDoor(id, x, yBottom, height, requiredSwitches, label) {
+        const mesh = this.addBoxMesh(x, yBottom + height / 2, 0, 0.65, height, 2.8, '#374151', true);
+        const solid = {
+          minX: x - 0.33,
+          maxX: x + 0.33,
+          minY: yBottom,
+          maxY: yBottom + height,
+          type: 'door'
+        };
+        this.solids.push(solid);
+        this.doors.push({ id, x, yBottom, height, mesh, solid, requiredSwitches, label, open: false });
+      }
+
+      addSwitch(id, x, y, label) {
+        const base = this.addBoxMesh(x, y, -0.4, 0.45, 0.6, 0.25, '#1f2937');
+        const lever = new THREE.Mesh(
+          new THREE.CylinderGeometry(0.04, 0.04, 0.55, 8),
+          new THREE.MeshStandardMaterial({ color: 0xef4444, emissive: 0x7f1d1d })
+        );
+        lever.position.set(x, y + 0.1, -0.25);
+        lever.rotation.z = 0.55;
+        this.levelGroup.add(lever);
+        this.switches.push({ id, x, y, label, lever, activated: false });
+      }
+
+      addPickup(id, label, x, y) {
+        const group = new THREE.Group();
+        group.position.set(x, y, 0);
+        const core = new THREE.Mesh(
+          new THREE.OctahedronGeometry(0.24, 0),
+          new THREE.MeshStandardMaterial({ color: 0xfbbf24, emissive: 0xd97706, emissiveIntensity: 1.3 })
+        );
+        const light = new THREE.PointLight(0xfbbf24, 1.5, 4.5);
+        group.add(core, light);
+        this.levelGroup.add(group);
+        this.pickups.push({ id, label, x, y, group, collected: false });
+      }
+
+      addRelic(relicData) {
+        const already = this.save.data.collectibles.includes(relicData.id);
+        const group = new THREE.Group();
+        group.position.set(relicData.x, relicData.y, 0.1);
+        const gem = new THREE.Mesh(
+          new THREE.DodecahedronGeometry(0.22, 0),
+          new THREE.MeshStandardMaterial({
+            color: already ? 0x64748b : 0x38bdf8,
+            emissive: already ? 0x1e293b : 0x0284c7,
+            emissiveIntensity: already ? 0.3 : 1.5
+          })
+        );
+        const light = new THREE.PointLight(0x38bdf8, already ? 0.3 : 1.4, 4.0);
+        group.add(gem, light);
+        this.levelGroup.add(group);
+        this.relics.push({ ...relicData, group, collected: already });
+      }
+
+      addHidingSpot(x, yBottom, width, label) {
+        // Visual hiding furniture (desk/wardrobe/alcove) in foreground/midground
+        const frame = this.addBoxMesh(x, yBottom + 0.65, -0.55, width, 1.3, 1.2, '#241c15', true);
+        frame.castShadow = false;
+        this.hidingSpots.push({ x, yBottom, width, label });
+      }
+
+      addWaterZone(xStart, xEnd, yBottom, ySurface) {
+        const w = xEnd - xStart;
+        const h = ySurface - yBottom;
+        const waterGeo = new THREE.BoxGeometry(w, h, 4.2);
+        const waterMat = new THREE.MeshStandardMaterial({
+          color: 0x0e4d64,
+          transparent: true,
+          opacity: 0.56,
+          roughness: 0.15,
+          metalness: 0.2
+        });
+        const mesh = new THREE.Mesh(waterGeo, waterMat);
+        mesh.position.set(xStart + w / 2, yBottom + h / 2, 0.2);
+        this.levelGroup.add(mesh);
+        this.waterZones.push({ xStart, xEnd, yBottom, ySurface, mesh });
+      }
+
+      addCheckpoint(x, y) {
+        const post = new THREE.Mesh(
+          new THREE.CylinderGeometry(0.05, 0.05, 1.3, 8),
+          new THREE.MeshStandardMaterial({ color: 0x475569 })
+        );
+        post.position.set(x, y + 0.65, -0.8);
+        const bulb = new THREE.Mesh(
+          new THREE.SphereGeometry(0.11, 10, 10),
+          new THREE.MeshStandardMaterial({ color: 0x64748b, emissive: 0x000000 })
+        );
+        bulb.position.set(x, y + 1.35, -0.8);
+        this.levelGroup.add(post, bulb);
+        this.checkpoints.push({ x, y, bulb, activated: false });
+      }
+
+      addMonster(type, x, y, patrolMinX, patrolMaxX, aquatic = false) {
+        const rig = createMonsterRig(type);
+        rig.root.position.set(x, y, 0);
+        this.levelGroup.add(rig.root);
+        this.monsters.push({
+          type,
+          rig,
+          x,
+          y,
+          spawnX: x,
+          spawnY: y,
+          patrolMinX,
+          patrolMaxX,
+          aquatic,
+          dir: 1,
+          state: 'PATROL',
+          stateTimer: 0,
+          lastKnownX: x,
+          stepTimer: 0
+        });
+      }
+
+      addExitGate(x, y, requiredItem, label) {
+        const frame = this.addBoxMesh(x, y + 1.1, -0.35, 1.6, 2.2, 0.4, '#1e293b', true);
+        const glow = new THREE.Mesh(
+          new THREE.PlaneGeometry(1.1, 1.8),
+          new THREE.MeshBasicMaterial({ color: 0xe29b38, side: THREE.DoubleSide })
+        );
+        glow.position.set(x, y + 1.1, -0.12);
+        this.levelGroup.add(glow);
+        this.exitGate = { x, y, requiredItem, label, glow };
+      }
+
+      /* Environmental Storytelling Props per Chapter */
+      addDormitoryProps() {
+        for (let i = 0; i < 6; i++) {
+          const bx = 2 + i * 8;
+          this.addBoxMesh(bx, 0.4, -1.8, 2.2, 0.8, 1.2, '#2d241e', true); // Bed frame
+          this.addBoxMesh(bx, 0.85, -1.8, 2.0, 0.2, 1.1, '#64748b'); // Mattress
+          // Tall Gothic Window with Moonlight Shaft
+          const win = new THREE.Mesh(
+            new THREE.PlaneGeometry(1.6, 3.4),
+            new THREE.MeshBasicMaterial({ color: 0x26384d })
+          );
+          win.position.set(bx + 3.5, 3.6, -2.9);
+          this.levelGroup.add(win);
+        }
+      }
+
+      addKitchenProps() {
+        for (let i = 0; i < 7; i++) {
+          const kx = 1 + i * 7.5;
+          this.addBoxMesh(kx, 2.6, -2.2, 2.8, 5.2, 1.2, '#27272a', true); // Industrial Fridge
+          // Hanging hooks
+          const chain = new THREE.Mesh(new THREE.CylinderGeometry(0.03, 0.03, 2.4, 6), this.mats.getPBR('#52525b', 0.4, 0.8));
+          chain.position.set(kx + 3.2, 5.2, -1.4);
+          this.levelGroup.add(chain);
+          this.animatedProps.push({ mesh: chain, phase: i * 0.9, type: 'swing' });
+        }
+      }
+
+      addPrisonProps() {
+        for (let x = -2; x <= 50; x += 3.0) {
+          const bar = new THREE.Mesh(new THREE.CylinderGeometry(0.05, 0.05, 6.5, 6), this.mats.getPBR('#334155', 0.6, 0.7));
+          bar.position.set(x, 3.2, -2.4);
+          this.levelGroup.add(bar);
+        }
+      }
+
+      addFactoryProps() {
+        for (let i = 0; i < 6; i++) {
+          const gx = 4 + i * 8.5;
+          const gear = new THREE.Mesh(
+            new THREE.TorusGeometry(1.3, 0.22, 8, 16),
+            this.mats.getPBR('#78350f', 0.5, 0.75)
+          );
+          gear.position.set(gx, 3.8, -2.5);
+          this.levelGroup.add(gear);
+          this.animatedProps.push({ mesh: gear, speed: (i % 2 === 0 ? 1 : -1) * 0.8, type: 'spin' });
+        }
+      }
+
+      addHospitalProps() {
+        for (let i = 0; i < 6; i++) {
+          const hx = 3 + i * 8.2;
+          this.addBoxMesh(hx, 1.5, -2.3, 2.4, 3.0, 0.8, '#1e2926', true);
+          const lightPanel = new THREE.Mesh(
+            new THREE.PlaneGeometry(1.8, 0.35),
+            new THREE.MeshBasicMaterial({ color: 0x6ee7b7 })
+          );
+          lightPanel.position.set(hx, 5.4, -1.5);
+          lightPanel.rotation.x = Math.PI / 2;
+          this.levelGroup.add(lightPanel);
+          this.animatedProps.push({ mesh: lightPanel, phase: i * 1.4, type: 'flicker' });
+        }
+      }
+
+      addRailwayProps() {
+        // Steel railway tracks along floor
+        this.addBoxMesh(25, 0.08, -0.9, 58, 0.14, 0.15, '#475569');
+        this.addBoxMesh(25, 0.08, 0.9, 58, 0.14, 0.15, '#475569');
+        for (let x = -2; x < 52; x += 6) {
+          this.addBoxMesh(x, 3.2, -2.5, 0.6, 6.4, 0.8, '#1e2029', true);
+        }
+      }
+
+      addTowerProps() {
+        for (let i = 0; i < 4; i++) {
+          const cx = 9 + i * 12;
+          const dial = new THREE.Mesh(
+            new THREE.RingGeometry(1.4, 1.85, 24),
+            new THREE.MeshBasicMaterial({ color: 0xa78bfa, side: THREE.DoubleSide })
+          );
+          dial.position.set(cx, 4.2, -2.7);
+          this.levelGroup.add(dial);
+          this.animatedProps.push({ mesh: dial, speed: 0.45 * (i % 2 === 0 ? 1 : -1), type: 'spin' });
+        }
+      }
+
+      addFinalProps() {
+        for (let i = 0; i < 8; i++) {
+          const px = 2 + i * 7.2;
+          this.addBoxMesh(px, 3.5, -2.4, 0.9, 7.0, 0.9, '#3b1818', true);
+        }
+      }
+    }
+
+    /* ==========================================================================
+       7. MAIN GAME ENGINE CONTROLLER
+       ========================================================================== */
+    class NightmareGame {
+      constructor() {
+        this.canvas = document.getElementById('game-canvas');
+        this.save = new SaveSystem();
+        this.audio = new AudioManager(this.save);
+        this.mats = new MaterialFactory();
+
+        this.renderer = null;
+        this.scene = null;
+        this.camera = null;
+        this.levelBuilder = null;
+        this.eli = null;
+
+        this.state = 'MENU'; // MENU, PLAYING, PAUSED, GAMEOVER, COMPLETE, CINEMATIC
+        this.chapterIdx = 0;
+        this.checkpointPos = { x: 0, y: 0 };
+        this.inventory = [];
+        this.hasLantern = false;
+        this.lanternOn = false;
+        this.lanternBattery = 100;
+
+        // Player Physics State
+        this.player = {
+          x: 0,
+          y: 0.2,
+          vx: 0,
+          vy: 0,
+          w: 0.48,
+          h: 1.15,
+          facing: 1,
+          grounded: false,
+          crouching: false,
+          hiding: false,
+          inWater: false,
+          animTime: 0,
+          stepTimer: 0
+        };
+
+        // Input State
+        this.keys = { left: false, right: false, jump: false, run: false, crouch: false, interact: false };
+        this.interactPressed = false;
+        this.activeInteractable = null;
+
+        // Camera State
+        this.camPos = new THREE.Vector3(0, 2.4, 8.8);
+        this.camShake = 0;
+
+        // Dust Particles
+        this.dustParticles = null;
+        this.clock = new THREE.Clock();
+      }
+
+      async boot() {
+        await this.save.init();
+        this.initThree();
+        this.bindEvents();
+        this.refreshMenuUI();
+        this.loadChapter(this.save.data.currentChapter, true);
+        this.state = 'MENU';
+        this.animate();
+      }
+
+      initThree() {
+        this.renderer = new THREE.WebGLRenderer({ canvas: this.canvas, antialias: true, powerPreference: 'high-performance' });
+        this.renderer.setSize(window.innerWidth, window.innerHeight);
+        this.renderer.shadowMap.enabled = true;
+        this.renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+        this.renderer.toneMapping = THREE.ACESFilmicToneMapping;
+        this.renderer.toneMappingExposure = 1.12;
+
+        this.scene = new THREE.Scene();
+        this.scene.fog = new THREE.FogExp2(0x070a0f, 0.036);
+
+        this.camera = new THREE.PerspectiveCamera(44, window.innerWidth / window.innerHeight, 0.1, 100);
+        this.camera.position.copy(this.camPos);
+
+        // Base Atmospheric Lighting
+        this.ambientLight = new THREE.AmbientLight(0x1b2434, 1.35);
+        this.scene.add(this.ambientLight);
+
+        this.dirLight = new THREE.DirectionalLight(0x9fb8d9, 1.45);
+        this.dirLight.position.set(12, 18, 14);
+        this.dirLight.castShadow = true;
+        this.dirLight.shadow.mapSize.width = 1024;
+        this.dirLight.shadow.mapSize.height = 1024;
+        this.dirLight.shadow.camera.near = 1;
+        this.dirLight.shadow.camera.far = 65;
+        const d = 28;
+        this.dirLight.shadow.camera.left = -d;
+        this.dirLight.shadow.camera.right = d;
+        this.dirLight.shadow.camera.top = d;
+        this.dirLight.shadow.camera.bottom = -d;
+        this.scene.add(this.dirLight);
+        this.scene.add(this.dirLight.target);
+
+        this.levelBuilder = new LevelBuilder(this.scene, this.mats, this.save);
+        this.eli = createEliCharacter(this.mats);
+        this.scene.add(this.eli.root);
+
+        this.createAtmosphereParticles();
+        this.applyGraphicsSettings();
+      }
+
+      createAtmosphereParticles() {
+        const count = 260;
+        const geo = new THREE.BufferGeometry();
+        const pos = new Float32Array(count * 3);
+        for (let i = 0; i < count; i++) {
+          pos[i * 3] = (Math.random() - 0.2) * 65;
+          pos[i * 3 + 1] = Math.random() * 7;
+          pos[i * 3 + 2] = (Math.random() - 0.5) * 5;
+        }
+        geo.setAttribute('position', new THREE.BufferAttribute(pos, 3));
+        const mat = new THREE.PointsMaterial({ color: 0xcbd5e1, size: 0.045, transparent: true, opacity: 0.42 });
+        this.dustParticles = new THREE.Points(geo, mat);
+        this.scene.add(this.dustParticles);
+      }
+
+      applyGraphicsSettings() {
+        const s = this.save.data.settings;
+        const dpr = Math.min(window.devicePixelRatio || 1, 2) * parseFloat(s.resolution || 1);
+        this.renderer.setPixelRatio(s.graphics === 'low' ? Math.min(1, dpr) : dpr);
+        this.renderer.shadowMap.enabled = s.graphics !== 'low';
+        this.dirLight.castShadow = s.graphics !== 'low';
+        if (this.dustParticles) this.dustParticles.visible = s.graphics !== 'low';
+
+        const mobileCtrl = document.getElementById('mobile-controls');
+        if (s.touch === 'hide') mobileCtrl.classList.add('hidden');
+        else mobileCtrl.classList.remove('hidden');
+      }
+
+      loadChapter(idx, previewOnly = false) {
+        this.chapterIdx = Math.max(0, Math.min(CHAPTER_DATA.length - 1, idx));
+        const ch = CHAPTER_DATA[this.chapterIdx];
+
+        this.levelBuilder.clear();
+        this.scene.fog.color.setHex(ch.fogColor);
+        this.scene.fog.density = ch.fogDensity;
+        this.ambientLight.color.setHex(ch.ambientColor);
+        this.dirLight.color.setHex(ch.accentLight);
+
+        ch.build(this.levelBuilder);
+        ch.relics.forEach((r) => this.levelBuilder.addRelic(r));
+
+        // Reset Player & State
+        this.inventory = [];
+        this.hasLantern = this.chapterIdx > 0; // Eli keeps lantern from Chapter 2 onward
+        this.lanternOn = this.hasLantern;
+        this.lanternBattery = 100;
+
+        this.checkpointPos = { x: 0.5, y: 0.1 };
+        if (!previewOnly && this.save.data.currentChapter === this.chapterIdx && this.save.data.checkpointIndex > 0) {
+          const cp = this.levelBuilder.checkpoints[this.save.data.checkpointIndex - 1];
+          if (cp) {
+            this.checkpointPos = { x: cp.x, y: cp.y + 0.1 };
+            cp.activated = true;
+            cp.bulb.material.emissive.setHex(0xe29b38);
+          }
+        }
+
+        this.respawnAtCheckpoint();
+        this.updateHUD();
+        if (!previewOnly) {
+          this.showStoryBanner(`${ch.num}: ${ch.title}`);
+        }
+      }
+
+      respawnAtCheckpoint() {
+        this.player.x = this.checkpointPos.x;
+        this.player.y = this.checkpointPos.y;
+        this.player.vx = 0;
+        this.player.vy = 0;
+        this.player.hiding = false;
+        this.player.crouching = false;
+        this.eli.root.position.set(this.player.x, this.player.y, 0);
+        this.camPos.set(this.player.x + 1.5, this.player.y + 2.2, 8.6);
+
+        // Reset monsters to patrol positions
+        for (const m of this.levelBuilder.monsters) {
+          m.x = m.spawnX;
+          m.y = m.spawnY;
+          m.state = 'PATROL';
+          m.rig.root.position.set(m.x, m.y, 0);
+        }
+        this.audio.setChaseTension(false);
+        document.getElementById('danger-pulse').style.boxShadow = 'inset 0 0 90px rgba(184, 41, 41, 0)';
+      }
+
+      showScreen(screenId) {
+        document.querySelectorAll('.ui-screen').forEach((el) => el.classList.add('hidden'));
+        if (screenId) {
+          document.getElementById(screenId).classList.remove('hidden');
+          document.getElementById('hud').classList.add('hidden');
+        } else {
+          document.getElementById('hud').classList.remove('hidden');
+        }
+      }
+
+      showStoryBanner(text, duration = 3800) {
+        const banner = document.getElementById('story-banner');
+        banner.textContent = text;
+        banner.style.opacity = '1';
+        clearTimeout(this.bannerTimeout);
+        this.bannerTimeout = setTimeout(() => {
+          banner.style.opacity = '0';
+        }, duration);
+      }
+
+      updateHUD() {
+        const ch = CHAPTER_DATA[this.chapterIdx];
+        document.getElementById('hud-ch-name').textContent = `${ch.num} – ${ch.title}`;
+        document.getElementById('hud-obj-text').textContent = ch.objective;
+        document.getElementById('hud-collectibles').textContent = `RELICS ${this.save.data.collectibles.length}/24`;
+
+        const batFill = document.getElementById('hud-battery');
+        batFill.style.width = `${this.hasLantern ? Math.round(this.lanternBattery) : 0}%`;
+        batFill.style.background = this.lanternBattery < 25 ? '#ef4444' : '#e29b38';
+
+        const stealthTag = document.getElementById('hud-stealth-tag');
+        if (this.player.hiding) stealthTag.textContent = 'HIDDEN';
+        else if (this.player.crouching) stealthTag.textContent = 'SNEAKING';
+        else stealthTag.textContent = '';
+
+        const invList = document.getElementById('hud-inv-list');
+        invList.innerHTML = '';
+        if (this.hasLantern) {
+          const el = document.createElement('div');
+          el.className = 'inv-slot';
+          el.textContent = this.lanternOn ? 'Lantern (ON)' : 'Lantern (OFF)';
+          invList.appendChild(el);
+        }
+        for (const item of this.inventory) {
+          const el = document.createElement('div');
+          el.className = 'inv-slot';
+          el.textContent = item.label;
+          invList.appendChild(el);
+        }
+      }
+
+      /* ==========================================================================
+         8. PHYSICS, COLLISION & PLAYER CONTROLLER
+         ========================================================================== */
+      updatePlayer(dt) {
+        const p = this.player;
+        const speedBase = p.crouching ? 2.1 : (this.keys.run && !p.inWater ? 5.6 : 3.6);
+
+        // Horizontal Acceleration & Deceleration
+        let moveDir = 0;
+        if (this.keys.left) moveDir -= 1;
+        if (this.keys.right) moveDir += 1;
+
+        if (moveDir !== 0) {
+          p.facing = moveDir;
+          p.hiding = false;
+          p.vx += (moveDir * speedBase - p.vx) * Math.min(1, dt * 14);
+        } else {
+          p.vx *= Math.pow(0.001, dt);
+          if (Math.abs(p.vx) < 0.05) p.vx = 0;
+        }
+
+        // Crouch toggle / hold
+        p.crouching = this.keys.crouch && p.grounded && !p.inWater;
+        const activeHeight = p.crouching ? 0.68 : 1.15;
+
+        // Check Water Zones
+        p.inWater = false;
+        for (const wz of this.levelBuilder.waterZones) {
+          if (p.x >= wz.xStart && p.x <= wz.xEnd && p.y < wz.ySurface) {
+            p.inWater = true;
+            break;
+          }
+        }
+
+        // Gravity & Jumping / Swimming
+        if (p.inWater) {
+          p.vy -= 6.5 * dt; // Reduced gravity in water
+          if (this.keys.jump) p.vy = 3.8;
+          p.vy = Math.max(-3.5, Math.min(4.2, p.vy));
+        } else {
+          p.vy -= 21.5 * dt;
+          if (this.keys.jump && p.grounded) {
+            p.vy = 8.4;
+            p.grounded = false;
+            this.audio.playJump();
+          }
+        }
+
+        // Move X & Resolve Solid Collisions
+        p.x += p.vx * dt;
+        for (const s of this.levelBuilder.solids) {
+          if (s.open) continue;
+          if (p.y + activeHeight > s.minY + 0.06 && p.y < s.maxY - 0.06) {
+            if (p.x + p.w / 2 > s.minX && p.x - p.w / 2 < s.maxX) {
+              // If pushbox, allow pushing!
+              if (s.type === 'pushbox' && this.keys.interact && p.grounded) {
+                const pushDelta = p.vx * 0.55 * dt;
+                if (this.canPushBox(s, pushDelta)) {
+                  s.x += pushDelta;
+                  s.minX = s.x - s.w / 2;
+                  s.maxX = s.x + s.w / 2;
+                  s.mesh.position.x = s.x;
+                }
+              }
+              if (p.vx > 0 && p.x < s.minX) {
+                p.x = s.minX - p.w / 2;
+                p.vx = 0;
+              } else if (p.vx < 0 && p.x > s.maxX) {
+                p.x = s.maxX + p.w / 2;
+                p.vx = 0;
+              }
+            }
+          }
+        }
+
+        // Move Y & Resolve Ground/Ceiling Collisions
+        const wasGrounded = p.grounded;
+        p.grounded = false;
+        p.y += p.vy * dt;
+
+        for (const s of this.levelBuilder.solids) {
+          if (s.open) continue;
+          if (p.x + p.w / 2 > s.minX + 0.04 && p.x - p.w / 2 < s.maxX - 0.04) {
+            // Landing on top
+            if (p.vy <= 0 && p.y <= s.maxY && p.y >= s.maxY - 0.45) {
+              p.y = s.maxY;
+              if (!wasGrounded && p.vy < -3.5) this.audio.playLand();
+              p.vy = 0;
+              p.grounded = true;
+              if (s.type === 'moving') {
+                p.x += s.vx * dt;
+              }
+            }
+            // Head bump ceiling
+            else if (p.vy > 0 && p.y + activeHeight >= s.minY && p.y < s.minY) {
+              p.y = s.minY - activeHeight;
+              p.vy = 0;
+            }
+          }
+        }
+
+        // Footstep Audio
+        if (Math.abs(p.vx) > 0.4 && (p.grounded || p.inWater)) {
+          p.stepTimer += dt * (this.keys.run ? 1.55 : 1.0);
+          if (p.stepTimer >= 0.42) {
+            p.stepTimer = 0;
+            this.audio.playFootstep(this.keys.run, p.inWater);
+          }
+        }
+
+        // Lantern Battery & Light
+        if (this.hasLantern && this.lanternOn) {
+          this.lanternBattery = Math.max(12, this.lanternBattery - dt * 0.45);
+          this.eli.lanternLight.intensity = 2.6 + Math.sin(performance.now() * 0.015) * 0.25;
+          this.eli.lanternBody.material.emissiveIntensity = 1.6;
+        } else {
+          this.eli.lanternLight.intensity = 0;
+          this.eli.lanternBody.material.emissiveIntensity = 0;
+        }
+
+        this.animateEli(dt, activeHeight);
+      }
+
+      canPushBox(box, dx) {
+        const nextMinX = box.minX + dx;
+        const nextMaxX = box.maxX + dx;
+        for (const s of this.levelBuilder.solids) {
+          if (s === box || s.open || s.type === 'floor') continue;
+          if (box.maxY > s.minY + 0.05 && box.minY < s.maxY - 0.05) {
+            if (nextMaxX > s.minX && nextMinX < s.maxX) return false;
+          }
+        }
+        return true;
+      }
+
+      animateEli(dt, activeHeight) {
+        const p = this.player;
+        const rig = this.eli;
+        rig.root.position.set(p.x, p.y, p.hiding ? -0.55 : 0);
+
+        // Smooth rotation toward facing direction
+        const targetRotY = p.facing === 1 ? Math.PI / 2 : -Math.PI / 2;
+        rig.root.rotation.y += (targetRotY - rig.root.rotation.y) * Math.min(1, dt * 14);
+
+        // Crouch scale compression
+        const targetScaleY = p.crouching ? 0.65 : 1.0;
+        rig.root.scale.y += (targetScaleY - rig.root.scale.y) * Math.min(1, dt * 14);
+
+        // Limb Swing Cycle
+        const speed = Math.abs(p.vx);
+        if (speed > 0.2 && p.grounded) {
+          p.animTime += dt * speed * 2.4;
+          const swing = Math.sin(p.animTime) * 0.65;
+          rig.legL.rotation.x = swing;
+          rig.legR.rotation.x = -swing;
+          rig.armL.rotation.x = -swing * 0.7;
+          rig.armR.rotation.x = this.hasLantern ? -0.55 + swing * 0.15 : swing * 0.7;
+        } else if (!p.grounded) {
+          rig.legL.rotation.x = 0.4;
+          rig.legR.rotation.x = -0.35;
+          rig.armL.rotation.x = -0.6;
+        } else {
+          rig.legL.rotation.x *= 0.85;
+          rig.legR.rotation.x *= 0.85;
+          rig.armL.rotation.x *= 0.85;
+          rig.armR.rotation.x = this.hasLantern ? -0.55 : 0;
+        }
+      }
+
+      /* ==========================================================================
+         9. INTERACTIONS, PUZZLES, COLLECTIBLES & CHECKPOINTS
+         ========================================================================== */
+      updateWorldAndInteractions(dt) {
+        const p = this.player;
+        const prompt = document.getElementById('interaction-prompt');
+        this.activeInteractable = null;
+
+        // Moving Platforms
+        for (const mp of this.levelBuilder.movingPlatforms) {
+          mp.vx = mp.dir * mp.speed;
+          mp.cx += mp.vx * dt;
+          if (mp.cx >= mp.xMax) { mp.cx = mp.xMax; mp.dir = -1; }
+          if (mp.cx <= mp.xMin) { mp.cx = mp.xMin; mp.dir = 1; }
+          mp.minX = mp.cx - mp.width / 2;
+          mp.maxX = mp.cx + mp.width / 2;
+          mp.mesh.position.x = mp.cx;
+        }
+
+        // Animated Environment Props
+        const t = performance.now() * 0.001;
+        for (const prop of this.levelBuilder.animatedProps) {
+          if (prop.type === 'spin') prop.mesh.rotation.z += prop.speed * dt;
+          else if (prop.type === 'swing') prop.mesh.rotation.z = Math.sin(t * 1.6 + prop.phase) * 0.18;
+          else if (prop.type === 'flicker') {
+            prop.mesh.visible = Math.sin(t * 14 + prop.phase) > -0.75;
+          }
+        }
+
+        // Automatic Pickups (Keys, Lantern, Gears)
+        for (const pk of this.levelBuilder.pickups) {
+          if (pk.collected) continue;
+          pk.group.rotation.y += dt * 2.2;
+          if (Math.hypot(p.x - pk.x, (p.y + 0.5) - pk.y) < 1.05) {
+            pk.collected = true;
+            pk.group.visible = false;
+            this.audio.playCollectible();
+            if (pk.id === 'lantern') {
+              this.hasLantern = true;
+              this.lanternOn = true;
+              this.showStoryBanner('Acquired Oil Lantern — Press F / LIGHT to toggle.');
+            } else {
+              this.inventory.push({ id: pk.id, label: pk.label });
+              this.showStoryBanner(`Collected: ${pk.label}`);
+            }
+            this.updateHUD();
+          }
+        }
+
+        // Secret Relics
+        for (const rel of this.levelBuilder.relics) {
+          rel.group.rotation.y += dt * 1.8;
+          if (!rel.collected && Math.hypot(p.x - rel.x, (p.y + 0.5) - rel.y) < 1.05) {
+            rel.collected = true;
+            rel.group.children[0].material.color.setHex(0x64748b);
+            rel.group.children[0].material.emissiveIntensity = 0.2;
+            this.save.addCollectible(rel.id);
+            this.audio.playCollectible();
+            this.showStoryBanner(`Secret Relic Discovered: ${rel.name} (${this.save.data.collectibles.length}/24)`);
+            this.updateHUD();
+          }
+        }
+
+        // Checkpoints
+        this.levelBuilder.checkpoints.forEach((cp, idx) => {
+          if (!cp.activated && Math.abs(p.x - cp.x) < 1.2 && Math.abs(p.y - cp.y) < 1.5) {
+            cp.activated = true;
+            cp.bulb.material.color.setHex(0xfbbf24);
+            cp.bulb.material.emissive.setHex(0xd97706);
+            this.checkpointPos = { x: cp.x, y: cp.y + 0.1 };
+            this.save.data.currentChapter = this.chapterIdx;
+            this.save.data.checkpointIndex = idx + 1;
+            this.save.save();
+            this.audio.playInteract();
+            this.showStoryBanner('Checkpoint Reached — Progress Saved', 2400);
+          }
+        });
+
+        // Contextual Interactive Objects (Switches, Doors, Hiding Spots, Push Boxes, Exit)
+        for (const sw of this.levelBuilder.switches) {
+          if (!sw.activated && Math.hypot(p.x - sw.x, (p.y + 0.5) - sw.y) < 1.35) {
+            this.activeInteractable = { type: 'switch', obj: sw, text: `[E / INTERACT] Activate ${sw.label}` };
+          }
+        }
+
+        for (const door of this.levelBuilder.doors) {
+          if (!door.open && Math.abs(p.x - door.x) < 1.5 && Math.abs(p.y - door.yBottom) < 2.2) {
+            if (door.requiredItem) {
+              const hasKey = this.inventory.some((i) => i.id === door.requiredItem);
+              this.activeInteractable = {
+                type: 'door',
+                obj: door,
+                text: hasKey ? `[E / INTERACT] Unlock ${door.label}` : `Locked: Requires ${door.requiredItem.replace('_', ' ').toUpperCase()}`
+              };
+            } else if (door.requiredSwitches) {
+              const ready = door.requiredSwitches.every((sid) => this.levelBuilder.switches.find((s) => s.id === sid)?.activated);
+              this.activeInteractable = {
+                type: 'door',
+                obj: door,
+                text: ready ? `[E / INTERACT] Open ${door.label}` : `Locked: Activate all switches (${door.requiredSwitches.length})`
+              };
+            }
+          }
+        }
+
+        for (const hs of this.levelBuilder.hidingSpots) {
+          if (Math.abs(p.x - hs.x) < hs.width * 0.55 && Math.abs(p.y - hs.yBottom) < 1.2) {
+            this.activeInteractable = {
+              type: 'hide',
+              obj: hs,
+              text: p.hiding ? `[E / MOVE] Exit ${hs.label}` : `[E / INTERACT] Hide inside ${hs.label}`
+            };
+          }
+        }
+
+        for (const box of this.levelBuilder.pushBoxes) {
+          if (Math.abs(p.x - box.x) < 1.15 && Math.abs(p.y - box.minY) < 1.0 && !this.activeInteractable) {
+            this.activeInteractable = {
+              type: 'push',
+              obj: box,
+              text: `Hold [E / INTERACT] + Move to Push Crate`
+            };
+          }
+        }
+
+        if (this.levelBuilder.exitGate) {
+          const eg = this.levelBuilder.exitGate;
+          if (Math.hypot(p.x - eg.x, p.y - eg.y) < 1.55) {
+            const hasReq = !eg.requiredItem || this.inventory.some((i) => i.id === eg.requiredItem);
+            this.activeInteractable = {
+              type: 'exit',
+              obj: eg,
+              text: hasReq ? `[E / INTERACT] Enter ${eg.label}` : `Requires ${eg.requiredItem.replace('_', ' ').toUpperCase()}`
+            };
+          }
+        }
+
+        if (this.activeInteractable) {
+          prompt.textContent = this.activeInteractable.text;
+          prompt.classList.remove('hidden');
+        } else {
+          prompt.classList.add('hidden');
+        }
+
+        if (this.interactPressed) {
+          this.interactPressed = false;
+          this.executeInteraction();
+        }
+      }
+
+      executeInteraction() {
+        const act = this.activeInteractable;
+        if (!act) return;
+
+        if (act.type === 'switch') {
+          act.obj.activated = true;
+          act.obj.lever.rotation.z = -0.55;
+          act.obj.lever.material.color.setHex(0x22c55e);
+          act.obj.lever.material.emissive.setHex(0x15803d);
+          this.audio.playSwitch();
+          this.showStoryBanner(`Activated: ${act.obj.label}`, 2200);
+          // Auto-check multi-switch doors
+          for (const d of this.levelBuilder.doors) {
+            if (!d.open && d.requiredSwitches) {
+              const allDone = d.requiredSwitches.every((sid) => this.levelBuilder.switches.find((s) => s.id === sid)?.activated);
+              if (allDone) {
+                this.openDoor(d);
+              }
+            }
+          }
+        } else if (act.type === 'door') {
+          const door = act.obj;
+          if (door.requiredItem) {
+            const idx = this.inventory.findIndex((i) => i.id === door.requiredItem);
+            if (idx !== -1) {
+              this.inventory.splice(idx, 1);
+              this.openDoor(door);
+              this.updateHUD();
+            } else {
+              this.audio.playSwitch();
+            }
+          } else if (door.requiredSwitches) {
+            const ready = door.requiredSwitches.every((sid) => this.levelBuilder.switches.find((s) => s.id === sid)?.activated);
+            if (ready) this.openDoor(door);
+          }
+        } else if (act.type === 'hide') {
+          this.player.hiding = !this.player.hiding;
+          this.player.vx = 0;
+          this.audio.playInteract();
+          this.updateHUD();
+        } else if (act.type === 'exit') {
+          const eg = act.obj;
+          if (!eg.requiredItem || this.inventory.some((i) => i.id === eg.requiredItem)) {
+            this.completeCurrentChapter();
+          }
+        }
+      }
+
+      openDoor(door) {
+        door.open = true;
+        door.solid.open = true;
+        door.mesh.position.y += door.height * 0.92;
+        this.camShake = 0.25;
+        this.audio.playPuzzleSuccess();
+        this.showStoryBanner(`${door.label} Unlocked!`);
+      }
+
+      /* ==========================================================================
+         10. ENEMY AI STATE MACHINE (Sight, Sound, Hiding & Chase)
+         ========================================================================== */
+      updateMonsters(dt) {
+        const p = this.player;
+        let anyChasing = false;
+        let closestDist = 99;
+
+        for (const m of this.levelBuilder.monsters) {
+          const dist = Math.hypot(p.x - m.x, p.y - m.y);
+          closestDist = Math.min(closestDist, dist);
+
+          // Determine if monster can detect Eli
+          const facingPlayer = (m.dir === 1 && p.x >= m.x) || (m.dir === -1 && p.x <= m.x);
+          const sameElevation = Math.abs(p.y - m.y) < 1.8;
+          const noiseRadius = this.keys.run && Math.abs(p.vx) > 1 ? 8.5 : (Math.abs(p.vx) > 0.5 && !p.crouching ? 4.2 : 1.3);
+          const sightRadius = m.type === 'watcher'
+            ? (this.lanternOn ? 11.5 : 5.5)
+            : (this.lanternOn ? 8.5 : 4.8);
+
+          let canDetect = false;
+          if (!p.hiding && sameElevation) {
+            if (dist < noiseRadius) canDetect = true;
+            if (facingPlayer && dist < sightRadius) canDetect = true;
+            if (m.aquatic && p.inWater && dist < 10.5) canDetect = true;
+          }
+
+          // State Machine Transitions
+          if (canDetect) {
+            if (m.state !== 'CHASE') {
+              m.state = 'CHASE';
+              this.audio.playMonsterAlert();
+              this.showStoryBanner(`${CHAPTER_DATA[this.chapterIdx].monsterName} spotted you! Hide or run!`, 2400);
+            }
+            m.lastKnownX = p.x;
+            m.stateTimer = 3.2;
+          } else if (m.state === 'CHASE') {
+            m.stateTimer -= dt;
+            if (m.stateTimer <= 0) {
+              m.state = 'SEARCH';
+              m.stateTimer = 2.5;
+            }
+          } else if (m.state === 'SEARCH') {
+            m.stateTimer -= dt;
+            if (m.stateTimer <= 0) {
+              m.state = 'PATROL';
+            }
+          }
+
+          // Movement Execution per State
+          let moveSpeed = 1.65;
+          if (m.state === 'CHASE') {
+            anyChasing = true;
+            moveSpeed = m.type === 'caretaker' ? 4.35 : 4.15;
+            m.dir = m.lastKnownX >= m.x ? 1 : -1;
+            m.x += m.dir * moveSpeed * dt;
+          } else if (m.state === 'SEARCH') {
+            moveSpeed = 1.1;
+            if (Math.abs(m.x - m.lastKnownX) > 0.4) {
+              m.dir = m.lastKnownX >= m.x ? 1 : -1;
+              m.x += m.dir * moveSpeed * dt;
+            } else {
+              m.dir = Math.sin(performance.now() * 0.004) >= 0 ? 1 : -1;
+            }
+          } else {
+            // PATROL
+            m.x += m.dir * moveSpeed * dt;
+            if (m.x >= m.patrolMaxX) { m.x = m.patrolMaxX; m.dir = -1; }
+            if (m.x <= m.patrolMinX) { m.x = m.patrolMinX; m.dir = 1; }
+          }
+
+          // Clamp within patrol/arena bounds
+          m.x = Math.max(m.patrolMinX - 2.0, Math.min(m.patrolMaxX + 2.0, m.x));
+
+          // Monster Footstep Audio
+          m.stepTimer += dt * (m.state === 'CHASE' ? 1.8 : 0.9);
+          if (m.stepTimer >= 0.55) {
+            m.stepTimer = 0;
+            this.audio.playMonsterStep(dist);
+          }
+
+          // Catch Check
+          if (!p.hiding && Math.abs(p.x - m.x) < 0.72 && Math.abs(p.y - m.y) < 1.35) {
+            this.triggerGameOver(`${CHAPTER_DATA[this.chapterIdx].monsterName} caught Eli in the shadows.`);
+            return;
+          }
+
+          // Animate Monster Rig
+          const rig = m.rig;
+          rig.root.position.set(m.x, m.y, 0);
+          const targetRot = m.dir === 1 ? Math.PI / 2 : -Math.PI / 2;
+          rig.root.rotation.y += (targetRot - rig.root.rotation.y) * Math.min(1, dt * 10);
+
+          const walkCycle = performance.now() * (m.state === 'CHASE' ? 0.014 : 0.006);
+          rig.legL.rotation.x = Math.sin(walkCycle) * 0.55;
+          rig.legR.rotation.x = -Math.sin(walkCycle) * 0.55;
+          rig.armL.rotation.x = m.state === 'CHASE' ? -0.95 + Math.sin(walkCycle) * 0.3 : -Math.sin(walkCycle) * 0.35;
+          rig.armR.rotation.x = m.state === 'CHASE' ? -0.95 - Math.sin(walkCycle) * 0.3 : Math.sin(walkCycle) * 0.35;
+          rig.gazeLight.color.setHex(m.state === 'CHASE' ? 0xff2222 : rig.cfg.eye);
+        }
+
+        this.audio.setChaseTension(anyChasing);
+        const pulse = document.getElementById('danger-pulse');
+        if (anyChasing) {
+          pulse.style.boxShadow = 'inset 0 0 110px rgba(210, 35, 35, 0.58)';
+        } else if (closestDist < 8) {
+          const alpha = ((8 - closestDist) / 8) * 0.35;
+          pulse.style.boxShadow = `inset 0 0 80px rgba(184, 41, 41, ${alpha.toFixed(2)})`;
+        } else {
+          pulse.style.boxShadow = 'inset 0 0 90px rgba(184, 41, 41, 0)';
+        }
+      }
+
+      /* ==========================================================================
+         11. CINEMATIC 2.5D CAMERA SYSTEM
+         ========================================================================== */
+      updateCamera(dt) {
+        const p = this.player;
+        const lookAhead = this.state === 'MENU' ? Math.sin(performance.now() * 0.0005) * 3.0 : p.facing * 1.45;
+        const targetX = p.x + lookAhead;
+        const targetY = p.y + (p.crouching ? 1.75 : 2.15);
+        const targetZ = this.state === 'MENU' ? 7.6 : (p.hiding ? 7.4 : 8.7);
+
+        this.camPos.x += (targetX - this.camPos.x) * Math.min(1, dt * 4.5);
+        this.camPos.y += (targetY - this.camPos.y) * Math.min(1, dt * 4.5);
+        this.camPos.z += (targetZ - this.camPos.z) * Math.min(1, dt * 3.5);
+
+        let shakeX = 0;
+        let shakeY = 0;
+        if (this.camShake > 0) {
+          shakeX = (Math.random() - 0.5) * this.camShake;
+          shakeY = (Math.random() - 0.5) * this.camShake;
+          this.camShake = Math.max(0, this.camShake - dt * 1.2);
+        }
+
+        this.camera.position.set(this.camPos.x + shakeX, this.camPos.y + shakeY, this.camPos.z);
+        this.camera.lookAt(this.camPos.x, this.camPos.y - 0.45, 0);
+
+        // Keep directional shadow frustum centered on Eli
+        this.dirLight.position.set(p.x + 8, p.y + 16, 12);
+        this.dirLight.target.position.set(p.x, p.y, 0);
+      }
+
+      /* ==========================================================================
+         12. GAME STATE TRANSITIONS (Death, Chapter Clear, Endings)
+         ========================================================================== */
+      triggerGameOver(reason) {
+        this.state = 'GAMEOVER';
+        this.audio.setChaseTension(false);
+        this.audio.playDeath();
+        document.getElementById('gameover-reason').textContent = reason;
+        this.showScreen('screen-gameover');
+      }
+
+      completeCurrentChapter() {
+        this.state = 'COMPLETE';
+        this.audio.setChaseTension(false);
+        this.audio.playPuzzleSuccess();
+
+        const ch = CHAPTER_DATA[this.chapterIdx];
+        const foundInChapter = ch.relics.filter((r) => this.save.data.collectibles.includes(r.id)).length;
+        const isFinal = this.chapterIdx === CHAPTER_DATA.length - 1;
+        const secretUnlocked = isFinal && this.save.data.collectibles.length >= 24;
+
+        this.save.completeChapter(this.chapterIdx);
+        this.refreshMenuUI();
+
+        document.getElementById('complete-sub').textContent = isFinal
+          ? (secretUnlocked ? 'TRUE SECRET ENDING UNLOCKED' : 'JOURNEY COMPLETE')
+          : `${ch.num} CLEARED`;
+        document.getElementById('complete-title').textContent = ch.title;
+        document.getElementById('complete-summary').textContent = secretUnlocked
+          ? 'With all 24 Forgotten Relics united, Eli shattered the Architect’s seal forever, freeing every lost soul beneath the earth.'
+          : ch.endingText;
+        document.getElementById('complete-relics').textContent = `Chapter Relics Discovered: ${foundInChapter} / 3 (Total: ${this.save.data.collectibles.length}/24)`;
+
+        const nextBtn = document.getElementById('btn-next-chapter');
+        nextBtn.textContent = isFinal ? 'Return to Title' : `Start Chapter ${this.chapterIdx + 2}`;
+        this.showScreen('screen-complete');
+      }
+
+      /* ==========================================================================
+         13. UI & INPUT BINDINGS
+         ========================================================================== */
+      refreshMenuUI() {
+        const contBtn = document.getElementById('btn-continue');
+        contBtn.disabled = !this.save.hasProgress();
+        document.getElementById('menu-relic-count').textContent = `${this.save.data.collectibles.length}/24`;
+
+        // Populate Chapter Select Grid
+        const grid = document.getElementById('chapter-grid');
+        grid.innerHTML = '';
+        CHAPTER_DATA.forEach((ch, idx) => {
+          const unlocked = this.save.data.unlockedChapters.includes(idx);
+          const completed = this.save.data.completedChapters.includes(idx);
+          const relicCount = ch.relics.filter((r) => this.save.data.collectibles.includes(r.id)).length;
+
+          const card = document.createElement('div');
+          card.className = `chapter-card ${unlocked ? '' : 'locked'}`;
+          card.innerHTML = `
+            <div>
+              <div class="ch-num">${ch.num} ${completed ? '✓' : ''}</div>
+              <div class="ch-title">${ch.title}</div>
+            </div>
+            <div class="ch-meta">
+              <span>${unlocked ? (completed ? 'Completed' : 'Unlocked') : 'Locked'}</span>
+              <span>Relics ${relicCount}/3</span>
+            </div>
+          `;
+          if (unlocked) {
+            card.addEventListener('click', () => {
+              this.audio.init();
+              this.save.data.currentChapter = idx;
+              this.save.data.checkpointIndex = 0;
+              this.save.save();
+              this.loadChapter(idx, false);
+              this.state = 'PLAYING';
+              this.showScreen(null);
+            });
+          }
+          grid.appendChild(card);
+        });
+
+        // Populate Collectibles Screen
+        const colList = document.getElementById('collectibles-list');
+        colList.innerHTML = '';
+        CHAPTER_DATA.forEach((ch) => {
+          ch.relics.forEach((r) => {
+            const found = this.save.data.collectibles.includes(r.id);
+            const item = document.createElement('div');
+            item.className = `chapter-card ${found ? '' : 'locked'}`;
+            item.style.minHeight = '82px';
+            item.innerHTML = `
+              <div class="ch-num">${ch.num}</div>
+              <div class="ch-title">${found ? r.name : '??? Undiscovered Relic'}</div>
+            `;
+            colList.appendChild(item);
+          });
+        });
+
+        // Sync Settings UI
+        const s = this.save.data.settings;
+        document.getElementById('set-graphics').value = s.graphics;
+        document.getElementById('set-resolution').value = String(s.resolution);
+        document.getElementById('set-vol-master').value = s.volMaster;
+        document.getElementById('set-vol-music').value = s.volMusic;
+        document.getElementById('set-vol-sfx').value = s.volSfx;
+        document.getElementById('set-touch').value = s.touch;
+      }
+
+      askConfirm(title, msg, onYes) {
+        const modal = document.getElementById('confirm-modal');
+        document.getElementById('confirm-title').textContent = title;
+        document.getElementById('confirm-msg').textContent = msg;
+        modal.classList.remove('hidden');
+
+        const yesBtn = document.getElementById('confirm-yes');
+        const noBtn = document.getElementById('confirm-no');
+
+        const cleanup = () => {
+          modal.classList.add('hidden');
+          yesBtn.onclick = null;
+          noBtn.onclick = null;
+        };
+        yesBtn.onclick = () => { cleanup(); onYes(); };
+        noBtn.onclick = cleanup;
+      }
+
+      bindEvents() {
+        window.addEventListener('resize', () => {
+          this.camera.aspect = window.innerWidth / window.innerHeight;
+          this.camera.updateProjectionMatrix();
+          this.renderer.setSize(window.innerWidth, window.innerHeight);
+        });
+
+        // Main Menu Buttons
+        document.getElementById('btn-continue').addEventListener('click', () => {
+          this.audio.init();
+          this.loadChapter(this.save.data.currentChapter, false);
+          this.state = 'PLAYING';
+          this.showScreen(null);
+        });
+
+        document.getElementById('btn-new-game').addEventListener('click', () => {
+          this.audio.init();
+          const startFresh = async () => {
+            await this.save.resetAll();
+            this.refreshMenuUI();
+            this.loadChapter(0, false);
+            this.state = 'PLAYING';
+            this.showScreen(null);
+          };
+          if (this.save.hasProgress()) {
+            this.askConfirm('Start New Game?', 'This will overwrite your current chapter and checkpoint progress.', startFresh);
+          } else {
+            startFresh();
+          }
+        });
+
+        document.getElementById('btn-chapters').addEventListener('click', () => {
+          this.refreshMenuUI();
+          this.showScreen('screen-chapters');
+        });
+        document.getElementById('btn-chapters-back').addEventListener('click', () => this.showScreen('screen-main'));
+
+        document.getElementById('btn-collectibles').addEventListener('click', () => {
+          this.refreshMenuUI();
+          this.showScreen('screen-collectibles');
+        });
+        document.getElementById('btn-collectibles-back').addEventListener('click', () => this.showScreen('screen-main'));
+
+        let settingsReturnScreen = 'screen-main';
+        document.getElementById('btn-settings').addEventListener('click', () => {
+          settingsReturnScreen = 'screen-main';
+          this.showScreen('screen-settings');
+        });
+        document.getElementById('btn-pause-settings').addEventListener('click', () => {
+          settingsReturnScreen = 'screen-pause';
+          this.showScreen('screen-settings');
+        });
+        document.getElementById('btn-settings-back').addEventListener('click', () => {
+          this.save.save();
+          this.showScreen(settingsReturnScreen);
+        });
+
+        document.getElementById('btn-credits').addEventListener('click', () => this.showScreen('screen-credits'));
+        document.getElementById('btn-credits-back').addEventListener('click', () => this.showScreen('screen-main'));
+
+        // Settings Inputs
+        document.getElementById('set-graphics').addEventListener('change', (e) => {
+          this.save.data.settings.graphics = e.target.value;
+          this.applyGraphicsSettings();
+        });
+        document.getElementById('set-resolution').addEventListener('change', (e) => {
+          this.save.data.settings.resolution = parseFloat(e.target.value);
+          this.applyGraphicsSettings();
+        });
+        document.getElementById('set-vol-master').addEventListener('input', (e) => {
+          this.save.data.settings.volMaster = parseFloat(e.target.value);
+          this.audio.applyVolumes();
+        });
+        document.getElementById('set-vol-music').addEventListener('input', (e) => {
+          this.save.data.settings.volMusic = parseFloat(e.target.value);
+          this.audio.applyVolumes();
+        });
+        document.getElementById('set-vol-sfx').addEventListener('input', (e) => {
+          this.save.data.settings.volSfx = parseFloat(e.target.value);
+          this.audio.applyVolumes();
+        });
+        document.getElementById('set-touch').addEventListener('change', (e) => {
+          this.save.data.settings.touch = e.target.value;
+          this.applyGraphicsSettings();
+        });
+        document.getElementById('btn-fullscreen').addEventListener('click', () => {
+          if (!document.fullscreenElement) {
+            document.documentElement.requestFullscreen?.().catch(() => {});
+          } else {
+            document.exitFullscreen?.().catch(() => {});
+          }
+        });
+        document.getElementById('btn-reset-save').addEventListener('click', () => {
+          this.askConfirm('Reset All Save Data?', 'All unlocked chapters and discovered relics will be erased.', async () => {
+            await this.save.resetAll();
+            this.refreshMenuUI();
+          });
+        });
+
+        // HUD & Pause Controls
+        document.getElementById('btn-pause').addEventListener('click', () => {
+          if (this.state === 'PLAYING') {
+            this.state = 'PAUSED';
+            this.showScreen('screen-pause');
+          }
+        });
+        document.getElementById('btn-hint').addEventListener('click', () => {
+          const ch = CHAPTER_DATA[this.chapterIdx];
+          this.showStoryBanner(`HINT: ${ch.objective}`, 4500);
+        });
+        document.getElementById('btn-resume').addEventListener('click', () => {
+          this.state = 'PLAYING';
+          this.showScreen(null);
+        });
+        document.getElementById('btn-restart-cp').addEventListener('click', () => {
+          this.respawnAtCheckpoint();
+          this.state = 'PLAYING';
+          this.showScreen(null);
+        });
+        document.getElementById('btn-pause-menu').addEventListener('click', () => {
+          this.state = 'MENU';
+          this.audio.setChaseTension(false);
+          this.refreshMenuUI();
+          this.showScreen('screen-main');
+        });
+
+        // Game Over & Chapter Complete Buttons
+        document.getElementById('btn-retry').addEventListener('click', () => {
+          this.respawnAtCheckpoint();
+          this.state = 'PLAYING';
+          this.showScreen(null);
+        });
+        document.getElementById('btn-gameover-menu').addEventListener('click', () => {
+          this.state = 'MENU';
+          this.refreshMenuUI();
+          this.showScreen('screen-main');
+        });
+        document.getElementById('btn-next-chapter').addEventListener('click', () => {
+          if (this.chapterIdx < CHAPTER_DATA.length - 1) {
+            this.loadChapter(this.chapterIdx + 1, false);
+            this.state = 'PLAYING';
+            this.showScreen(null);
+          } else {
+            this.state = 'MENU';
+            this.refreshMenuUI();
+            this.showScreen('screen-main');
+          }
+        });
+        document.getElementById('btn-complete-menu').addEventListener('click', () => {
+          this.state = 'MENU';
+          this.refreshMenuUI();
+          this.showScreen('screen-main');
+        });
+
+        // Keyboard Listeners
+        window.addEventListener('keydown', (e) => {
+          this.audio.init();
+          if (e.code === 'ArrowLeft' || e.code === 'KeyA') this.keys.left = true;
+          if (e.code === 'ArrowRight' || e.code === 'KeyD') this.keys.right = true;
+          if (e.code === 'Space' || e.code === 'ArrowUp' || e.code === 'KeyW') this.keys.jump = true;
+          if (e.code === 'ShiftLeft' || e.code === 'ShiftRight') this.keys.run = true;
+          if (e.code === 'KeyC' || e.code === 'ArrowDown' || e.code === 'KeyS') {
+            this.keys.crouch = true;
+            this.updateHUD();
+          }
+          if (e.code === 'KeyE') {
+            if (!this.keys.interact) this.interactPressed = true;
+            this.keys.interact = true;
+          }
+          if (e.code === 'KeyF' && this.state === 'PLAYING' && this.hasLantern) {
+            this.lanternOn = !this.lanternOn;
+            this.audio.playSwitch();
+            this.updateHUD();
+          }
+          if (e.code === 'Escape' || e.code === 'KeyP') {
+            if (this.state === 'PLAYING') {
+              this.state = 'PAUSED';
+              this.showScreen('screen-pause');
+            } else if (this.state === 'PAUSED') {
+              this.state = 'PLAYING';
+              this.showScreen(null);
+            }
+          }
+        });
+
+        window.addEventListener('keyup', (e) => {
+          if (e.code === 'ArrowLeft' || e.code === 'KeyA') this.keys.left = false;
+          if (e.code === 'ArrowRight' || e.code === 'KeyD') this.keys.right = false;
+          if (e.code === 'Space' || e.code === 'ArrowUp' || e.code === 'KeyW') this.keys.jump = false;
+          if (e.code === 'ShiftLeft' || e.code === 'ShiftRight') this.keys.run = false;
+          if (e.code === 'KeyC' || e.code === 'ArrowDown' || e.code === 'KeyS') {
+            this.keys.crouch = false;
+            this.updateHUD();
+          }
+          if (e.code === 'KeyE') this.keys.interact = false;
+        });
+
+        // Mobile Touch Controls Helper
+        const bindHoldBtn = (id, keyName, onPress = null) => {
+          const el = document.getElementById(id);
+          const down = (ev) => {
+            ev.preventDefault();
+            this.audio.init();
+            if (keyName) this.keys[keyName] = true;
+            el.classList.add('active');
+            if (onPress) onPress();
+          };
+          const up = (ev) => {
+            ev.preventDefault();
+            if (keyName) this.keys[keyName] = false;
+            el.classList.remove('active');
+            if (keyName === 'crouch') this.updateHUD();
+          };
+          el.addEventListener('touchstart', down, { passive: false });
+          el.addEventListener('touchend', up, { passive: false });
+          el.addEventListener('touchcancel', up, { passive: false });
+          el.addEventListener('mousedown', down);
+          el.addEventListener('mouseup', up);
+          el.addEventListener('mouseleave', up);
+        };
+
+        bindHoldBtn('ctrl-left', 'left');
+        bindHoldBtn('ctrl-right', 'right');
+        bindHoldBtn('ctrl-jump', 'jump');
+        bindHoldBtn('ctrl-run', 'run');
+        bindHoldBtn('ctrl-crouch', 'crouch', () => this.updateHUD());
+        bindHoldBtn('ctrl-interact', 'interact', () => { this.interactPressed = true; });
+        bindHoldBtn('ctrl-lantern', null, () => {
+          if (this.hasLantern) {
+            this.lanternOn = !this.lanternOn;
+            this.audio.playSwitch();
+            this.updateHUD();
+          }
+        });
+      }
+
+      animate() {
+        requestAnimationFrame(() => this.animate());
+        const dt = Math.min(this.clock.getDelta(), 0.05);
+
+        if (this.state === 'PLAYING') {
+          this.updatePlayer(dt);
+          this.updateWorldAndInteractions(dt);
+          this.updateMonsters(dt);
+        }
+
+        if (this.dustParticles) {
+          this.dustParticles.rotation.y += dt * 0.015;
+        }
+
+        this.updateCamera(dt);
+        this.renderer.render(this.scene, this.camera);
+      }
+    }
+
+    window.addEventListener('DOMContentLoaded', () => {
+      const game = new NightmareGame();
+      game.boot();
+    });
+  </script>
+</body>
+</html>
+
+```
